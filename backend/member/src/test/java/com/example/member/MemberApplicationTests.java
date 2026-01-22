@@ -1,10 +1,10 @@
-package com.minseong.stock_news_api;
+package com.example.member;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class StockNewsApiApplicationTests {
+class MemberApplicationTests {
 
 	@Test
 	void contextLoads() {
