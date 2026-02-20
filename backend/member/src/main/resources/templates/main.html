@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>login</title>
+    <title>main</title>
 </head>
 <body>
-<form action="/member/login" method="post">
-    이메일: <input type="text" name="memberEmail"> <br>
-    비밀번호: <input type="password" name="memberPassword"> <br>
-    <input type="submit" value="로그인">
-</form>
+session 값 확인: <p th:text="${session.loginEmail}"></p>
+<a href="/member/update">내 정보 수정하기</a>
+<a href="/member/logout">로그아웃</a>
 </body>
 </html>
