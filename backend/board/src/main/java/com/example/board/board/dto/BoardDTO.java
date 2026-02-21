@@ -1,6 +1,6 @@
-package com.example.board.dto;
+package com.example.board.board.dto;
 
-import com.example.board.entity.BoardEntity;
+import com.example.board.board.entity.BoardEntity;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 

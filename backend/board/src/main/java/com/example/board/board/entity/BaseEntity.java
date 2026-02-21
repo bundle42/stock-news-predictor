@@ -1,4 +1,4 @@
-package com.example.board.entity;
+package com.example.board.board.entity;
 
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;

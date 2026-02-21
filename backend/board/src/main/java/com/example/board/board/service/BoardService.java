@@ -1,16 +1,15 @@
-package com.example.board.service;
+package com.example.board.board.service;
 
-import com.example.board.dto.BoardDTO;
-import com.example.board.entity.BoardEntity;
-import com.example.board.entity.BoardFileEntity;
-import com.example.board.repository.BoardFileRepository;
-import com.example.board.repository.BoardRepository;
+import com.example.board.board.dto.BoardDTO;
+import com.example.board.board.entity.BoardEntity;
+import com.example.board.board.entity.BoardFileEntity;
+import com.example.board.board.repository.BoardFileRepository;
+import com.example.board.board.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
