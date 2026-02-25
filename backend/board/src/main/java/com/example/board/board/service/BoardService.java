@@ -5,6 +5,8 @@ import com.example.board.board.entity.BoardEntity;
 import com.example.board.board.entity.BoardFileEntity;
 import com.example.board.board.repository.BoardFileRepository;
 import com.example.board.board.repository.BoardRepository;
+import com.example.board.member.entity.MemberEntity;
+import com.example.board.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,11 +30,14 @@ import java.util.Optional;
 public class BoardService {
     private final BoardRepository boardRepository;
     private final BoardFileRepository boardFileRepository;
-    public void save(BoardDTO boardDTO) throws IOException {
+    private final MemberRepository memberRepository;
+    public void save(BoardDTO boardDTO, Long memberId) throws IOException {
+        MemberEntity member = memberRepository.findById(memberId).get();
         // 파일 첨부 여부에 따라 로직 분리
         if (boardDTO.getBoardFile().isEmpty()) {
             // 첨부 파일 없음.
             BoardEntity boardEntity = BoardEntity.toSaveEntity(boardDTO);
+            boardEntity.setMember(member);
             boardRepository.save(boardEntity);
         } else {
             // 첨부 파일 있음.
@@ -53,6 +58,7 @@ public class BoardService {
 //            String savePath = "/Users/사용자이름/springboot_img/" + storedFileName; // C:/springboot_img/9802398403948_내사진.jpg
             boardFile.transferTo(new File(savePath)); // 5.
             BoardEntity boardEntity = BoardEntity.toSaveFileEntity(boardDTO);
+            boardEntity.setMember(member);
             Long savedId = boardRepository.save(boardEntity).getId();
             BoardEntity board = boardRepository.findById(savedId).get();
 

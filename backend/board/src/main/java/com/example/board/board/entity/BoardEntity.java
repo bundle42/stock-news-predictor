@@ -1,6 +1,7 @@
 package com.example.board.board.entity;
 
 import com.example.board.board.dto.BoardDTO;
+import com.example.board.member.entity.MemberEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,6 +42,10 @@ public class BoardEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "boardEntity", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CommentEntity> commentEntityList = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private MemberEntity member;
 
     public static BoardEntity toSaveEntity(BoardDTO boardDTO) {
         BoardEntity boardEntity = new BoardEntity();

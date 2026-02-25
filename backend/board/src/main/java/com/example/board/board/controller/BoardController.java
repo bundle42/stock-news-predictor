@@ -4,6 +4,7 @@ import com.example.board.board.dto.BoardDTO;
 import com.example.board.board.dto.CommentDTO;
 import com.example.board.board.service.BoardService;
 import com.example.board.board.service.CommentService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,15 +24,27 @@ public class BoardController {
     private final CommentService commentService;
 
     @GetMapping("/save")
-    public String saveForm() {
+    public String saveForm(HttpSession session) {
+
+        if (session.getAttribute("loginId") == null) {
+            return "redirect:/member/login";
+        }
+
         return "board/save";
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute BoardDTO boardDTO) throws IOException {
+    public String save(@ModelAttribute BoardDTO boardDTO, HttpSession session) throws IOException {
         System.out.println("boardDTO = " + boardDTO);
-        boardService.save(boardDTO);
-        return "board/index";
+        Long memberId = (Long) session.getAttribute("loginId");
+        System.out.println("memberId = " + memberId);
+
+        if (memberId == null) {
+            return "redirect:/member/login";
+        }
+
+        boardService.save(boardDTO, memberId);
+        return "redirect:/board/";
     }
 
     @GetMapping("/")
