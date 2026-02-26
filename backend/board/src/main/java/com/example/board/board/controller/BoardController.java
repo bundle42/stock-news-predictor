@@ -73,18 +73,21 @@ public class BoardController {
     }
 
     @GetMapping("/update/{id}")
-    public String updateForm(@PathVariable Long id, Model model) {
+    public String updateForm(@PathVariable Long id,
+                             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+                             Model model) {
         BoardDTO boardDTO = boardService.findById(id);
         model.addAttribute("boardUpdate", boardDTO);
+        model.addAttribute("page", page);  // 수정 후 detail에서도 사용
         return "board/update";
     }
 
     @PostMapping("/update")
-    public String update(@ModelAttribute BoardDTO boardDTO, Model model) {
+    public String update(@ModelAttribute BoardDTO boardDTO,
+                         @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
         BoardDTO board = boardService.update(boardDTO);
-        model.addAttribute("board", board);
-        return "board/detail";
-//        return "redirect:/board/" + boardDTO.getId();
+        // redirect할 때 page 정보 같이 전달
+        return "redirect:/board/" + boardDTO.getId() + "?page=" + page;
     }
 
     @GetMapping("/delete/{id}")
@@ -93,28 +96,22 @@ public class BoardController {
         return "redirect:/board/";
     }
 
-    // /board/paging?page=1
     @GetMapping("/paging")
     public String paging(@PageableDefault(page = 1) Pageable pageable, Model model) {
-//        pageable.getPageNumber();
         Page<BoardDTO> boardList = boardService.paging(pageable);
-        int blockLimit = 3;
-        int startPage = (((int)(Math.ceil((double)pageable.getPageNumber() / blockLimit))) - 1) * blockLimit + 1; // 1 4 7 10 ~~
-        int endPage = ((startPage + blockLimit - 1) < boardList.getTotalPages()) ? startPage + blockLimit - 1 : boardList.getTotalPages();
 
-        // page 갯수 20개
-        // 현재 사용자가 3페이지
-        // 1 2 3
-        // 현재 사용자가 7페이지
-        // 7 8 9
-        // 보여지는 페이지 갯수 3개
-        // 총 페이지 갯수 8개
+        int blockLimit = 3;
+        int currentPage = pageable.getPageNumber(); // 1-based 그대로 사용
+        currentPage = currentPage + 1; // 1-based로 변환
+
+        int startPage = (((int) Math.ceil((double) currentPage / blockLimit)) - 1) * blockLimit + 1;
+        int endPage = ((startPage + blockLimit - 1) < boardList.getTotalPages()) ? startPage + blockLimit - 1 : boardList.getTotalPages();
 
         model.addAttribute("boardList", boardList);
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
+        model.addAttribute("page", currentPage); // detail에서 돌아올 때 필요
         return "board/paging";
-
     }
 
 }

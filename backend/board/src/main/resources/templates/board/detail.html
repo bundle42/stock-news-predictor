@@ -110,9 +110,8 @@
 
     }
     const listReq = () => {
-        console.log("목록 요청");
-        const page = [[${page}]];
-        location.href = "/board/paging?page="+page;
+        const page = [[${page}]]; // Controller에서 전달한 현재 페이지
+        location.href = "/board/paging?page=" + page;
     }
     const updateReq = () => {
         const id = [[${board.id}]];
