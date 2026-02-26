@@ -24,11 +24,14 @@ public class BoardController {
     private final CommentService commentService;
 
     @GetMapping("/save")
-    public String saveForm(HttpSession session) {
+    public String saveForm(HttpSession session, Model model) {
 
         if (session.getAttribute("loginId") == null) {
             return "redirect:/member/login";
         }
+
+        String email = (String) session.getAttribute("loginEmail");
+        model.addAttribute("email", email);
 
         return "board/save";
     }
@@ -56,19 +59,23 @@ public class BoardController {
     }
 
     @GetMapping("/{id}")
-    public String findById(@PathVariable Long id, Model model,
-                           @PageableDefault(page=1) Pageable pageable) {
-        /*
-            해당 게시글의 조회수를 하나 올리고
-            게시글 데이터를 가져와서 detail.html에 출력
-         */
+    public String findById(@PathVariable Long id,
+                           Model model,
+                           @PageableDefault(page=1) Pageable pageable,
+                           HttpSession session) {
+
         boardService.updateHits(id);
         BoardDTO boardDTO = boardService.findById(id);
-        /* 댓글 목록 가져오기 */
+
         List<CommentDTO> commentDTOList = commentService.findAll(id);
+
+        String email = (String) session.getAttribute("loginEmail");
+
         model.addAttribute("commentList", commentDTOList);
         model.addAttribute("board", boardDTO);
         model.addAttribute("page", pageable.getPageNumber());
+        model.addAttribute("sessionEmail", email);
+
         return "board/detail";
     }
 
@@ -112,6 +119,19 @@ public class BoardController {
         model.addAttribute("endPage", endPage);
         model.addAttribute("page", currentPage); // detail에서 돌아올 때 필요
         return "board/paging";
+    }
+
+    @GetMapping("/myList")
+    public String myList(HttpSession session, Model model) {
+        Long memberId = (Long) session.getAttribute("loginId");
+        if (memberId == null) {
+            return "redirect:/member/login";
+        }
+
+        List<BoardDTO> boardList = boardService.findByMemberId(memberId);
+        model.addAttribute("boardList", boardList);
+
+        return "board/myList"; // myList.html
     }
 
 }

@@ -20,6 +20,7 @@
     <a th:if="${session.loginId == null}" href="/member/login">로그인</a>
     <!-- 로그인 된 경우 -->
     <a th:if="${session.loginId != null}" href="/member/logout">로그아웃</a>
+    <a th:if="${session.loginId != null}" href="/board/myList">내가 작성한 글</a>
     <a href="/member/">회원목록</a>
 </body>
 <script>

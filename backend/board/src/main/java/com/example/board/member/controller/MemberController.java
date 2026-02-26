@@ -87,7 +87,7 @@ public class MemberController {
     @GetMapping("/member/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "member/index";
+        return "index";
     }
 
     @PostMapping("/member/email-check")

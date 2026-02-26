@@ -37,9 +37,12 @@
         <td><img th:src="@{|/upload/${board.storedFileName}|}" alt=""></td>
     </tr>
 </table>
+
 <button onclick="listReq()">목록</button>
-<button onclick="updateReq()">수정</button>
-<button onclick="deleteReq()">삭제</button>
+<span th:if="${sessionEmail == board.boardWriter}">
+    <button onclick="updateReq()">수정</button>
+    <button onclick="deleteReq()">삭제</button>
+</span>
 
 <!-- 댓글 작성 부분 -->
 <div id="comment-write">

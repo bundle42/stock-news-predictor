@@ -126,6 +126,13 @@ public class BoardService {
         Page<BoardDTO> boardDTOS = boardEntities.map(board -> new BoardDTO(board.getId(), board.getBoardWriter(), board.getBoardTitle(), board.getBoardHits(), board.getCreatedTime()));
         return boardDTOS;
     }
+
+    public List<BoardDTO> findByMemberId(Long memberId) {
+        return boardRepository.findAllByMemberId(memberId)
+                .stream()
+                .map(BoardDTO::toBoardDTO)
+                .toList();
+    }
 }
 
 
