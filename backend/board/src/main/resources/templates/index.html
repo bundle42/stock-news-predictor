@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>index</title>
@@ -11,8 +11,15 @@
     <button onclick="pagingReq()">페이징목록</button>
 
     <h2>Hello Spring Boot!!</h2>
+    <div th:if="${session.loginEmail != null}">
+        <p th:text="${session.loginEmail} + '님 로그인중'"></p>
+    </div>
+
     <a href="/member/save">회원가입</a>
-    <a href="/member/login">로그인</a>
+    <!-- 로그인 안 된 경우 -->
+    <a th:if="${session.loginId == null}" href="/member/login">로그인</a>
+    <!-- 로그인 된 경우 -->
+    <a th:if="${session.loginId != null}" href="/member/logout">로그아웃</a>
     <a href="/member/">회원목록</a>
 </body>
 <script>
