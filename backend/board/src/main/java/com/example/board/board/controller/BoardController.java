@@ -4,6 +4,7 @@ import com.example.board.board.dto.BoardDTO;
 import com.example.board.board.dto.CommentDTO;
 import com.example.board.board.service.BoardService;
 import com.example.board.board.service.CommentService;
+import com.example.board.board.service.NaverNewsService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import java.util.List;
 public class BoardController {
     private final BoardService boardService;
     private final CommentService commentService;
+    private final NaverNewsService naverNewsService;
 
     @GetMapping("/save")
     public String saveForm(HttpSession session, Model model) {
@@ -134,6 +136,11 @@ public class BoardController {
         return "board/myList"; // myList.html
     }
 
+    @GetMapping("/news/import")
+    public String importNews() {
+        naverNewsService.saveNewsToBoard();
+        return "redirect:/board/";
+    }
 }
 
 

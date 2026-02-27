@@ -18,3 +18,8 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+
+# 네이버 뉴스 API
+naver:
+  client-id: ${NAVER_CLIENT_ID}
+  client-secret: ${NAVER_CLIENT_SECRET}

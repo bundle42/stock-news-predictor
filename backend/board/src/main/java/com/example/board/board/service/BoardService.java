@@ -133,6 +133,10 @@ public class BoardService {
                 .map(BoardDTO::toBoardDTO)
                 .toList();
     }
+
+    public void saveFromApi(BoardDTO boardDTO) {
+        boardRepository.save(BoardEntity.toSaveEntity(boardDTO));
+    }
 }
 
 
