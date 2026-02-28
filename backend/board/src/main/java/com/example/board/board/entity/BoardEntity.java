@@ -47,6 +47,12 @@ public class BoardEntity extends BaseEntity {
     @JoinColumn(name = "member_id")
     private MemberEntity member;
 
+    @Column
+    private String sentimentLabel;
+
+    @Column
+    private Double sentimentScore;
+
     public static BoardEntity toSaveEntity(BoardDTO boardDTO) {
         BoardEntity boardEntity = new BoardEntity();
         boardEntity.setBoardWriter(boardDTO.getBoardWriter());
@@ -55,6 +61,10 @@ public class BoardEntity extends BaseEntity {
         boardEntity.setBoardContents(boardDTO.getBoardContents());
         boardEntity.setBoardHits(0);
         boardEntity.setFileAttached(0); // 파일 없음.
+
+        boardEntity.setSentimentLabel(boardDTO.getSentimentLabel());
+        boardEntity.setSentimentScore(boardDTO.getSentimentScore());
+
         return boardEntity;
     }
 

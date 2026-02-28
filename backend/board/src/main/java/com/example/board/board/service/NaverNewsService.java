@@ -61,11 +61,17 @@ public class NaverNewsService {
                 Map<String, Object> result = sendToPythonRead(title);
                 System.out.println("Python 응답: " + result);
 
+                String label = (String) result.get("label");
+                Double score = Double.valueOf(result.get("score").toString());
+
                 BoardDTO boardDTO = new BoardDTO();
                 boardDTO.setBoardTitle(title);
                 boardDTO.setBoardContents(description);
                 boardDTO.setBoardWriter("bb");
                 boardDTO.setBoardPass("bb");
+
+                boardDTO.setSentimentLabel(label);
+                boardDTO.setSentimentScore(score);
 
                 boardService.saveFromApi(boardDTO);
             }
