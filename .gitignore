@@ -1,0 +1,22 @@
+# Python virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Model files
+*.pt
+*.h5
+*.pkl
+
+# Large data
+data/
+*.csv
+
+# IDE
+.idea/
+*.iml
+
+# Logs
+*.log

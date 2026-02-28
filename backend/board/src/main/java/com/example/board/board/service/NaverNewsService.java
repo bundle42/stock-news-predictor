@@ -9,6 +9,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class NaverNewsService {
@@ -54,6 +57,10 @@ public class NaverNewsService {
                 title = title.replaceAll("<[^>]*>", "");
                 description = description.replaceAll("<[^>]*>", "");
 
+                // 파이썬으로 보낸 요청을 받은 응답
+                Map<String, Object> result = sendToPythonRead(title);
+                System.out.println("Python 응답: " + result);
+
                 BoardDTO boardDTO = new BoardDTO();
                 boardDTO.setBoardTitle(title);
                 boardDTO.setBoardContents(description);
@@ -66,5 +73,27 @@ public class NaverNewsService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // 파이썬 호출 코드(코드 항상 동일)
+    public Map<String, Object> sendToPythonRead(String content) {
+
+        String url = "http://localhost:8003/analyze";
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("content", content);
+
+        HttpEntity<Map<String, String>> request =
+                new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<Map> response =
+                restTemplate.postForEntity(url, request, Map.class);
+
+        return response.getBody();
     }
 }
