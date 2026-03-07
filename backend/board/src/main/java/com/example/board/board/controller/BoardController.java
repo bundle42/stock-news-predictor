@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -26,29 +27,23 @@ public class BoardController {
     private final NaverNewsService naverNewsService;
 
     @GetMapping("/save")
-    public String saveForm(HttpSession session, Model model) {
+    public String saveForm(Authentication authentication, Model model) {
 
-        if (session.getAttribute("loginId") == null) {
-            return "redirect:/member/login";
-        }
+        String email = authentication.getName(); // 로그인 이메일
 
-        String email = (String) session.getAttribute("loginEmail");
         model.addAttribute("email", email);
 
         return "board/save";
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute BoardDTO boardDTO, HttpSession session) throws IOException {
-        System.out.println("boardDTO = " + boardDTO);
-        Long memberId = (Long) session.getAttribute("loginId");
-        System.out.println("memberId = " + memberId);
+    public String save(@ModelAttribute BoardDTO boardDTO,
+                       Authentication authentication) throws IOException {
 
-        if (memberId == null) {
-            return "redirect:/member/login";
-        }
+        String email = authentication.getName();
 
-        boardService.save(boardDTO, memberId);
+        boardService.save(boardDTO, email);
+
         return "redirect:/board/";
     }
 
@@ -63,15 +58,15 @@ public class BoardController {
     @GetMapping("/{id}")
     public String findById(@PathVariable Long id,
                            Model model,
-                           @PageableDefault(page=1) Pageable pageable,
-                           HttpSession session) {
+                           Authentication authentication,
+                           @PageableDefault(page=1) Pageable pageable) {
 
         boardService.updateHits(id);
         BoardDTO boardDTO = boardService.findById(id);
 
         List<CommentDTO> commentDTOList = commentService.findAll(id);
 
-        String email = (String) session.getAttribute("loginEmail");
+        String email = authentication.getName();
 
         model.addAttribute("commentList", commentDTOList);
         model.addAttribute("board", boardDTO);
@@ -124,16 +119,15 @@ public class BoardController {
     }
 
     @GetMapping("/myList")
-    public String myList(HttpSession session, Model model) {
-        Long memberId = (Long) session.getAttribute("loginId");
-        if (memberId == null) {
-            return "redirect:/member/login";
-        }
+    public String myList(Authentication authentication, Model model) {
 
-        List<BoardDTO> boardList = boardService.findByMemberId(memberId);
+        String email = authentication.getName();
+
+        List<BoardDTO> boardList = boardService.findByMemberEmail(email);
+
         model.addAttribute("boardList", boardList);
 
-        return "board/myList"; // myList.html
+        return "board/myList";
     }
 
     @GetMapping("/news/import")

@@ -35,6 +35,7 @@ public class MemberController {
         return "member/login";
     }
 
+    /** 삭제, security가 처리
     @PostMapping("/member/login")
     public String login(@ModelAttribute MemberDTO memberDTO, HttpSession session) {
         MemberDTO loginResult = memberService.login(memberDTO);
@@ -48,6 +49,7 @@ public class MemberController {
             return "member/login";
         }
     }
+     **/
 
     @GetMapping("/member/")
     public String findAll(Model model) {
