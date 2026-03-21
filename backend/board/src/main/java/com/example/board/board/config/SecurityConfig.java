@@ -22,7 +22,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/member/login")
                         .loginProcessingUrl("/member/login")
-                        .defaultSuccessUrl("/", true)
+                        .defaultSuccessUrl("/member/main", true)
                         .permitAll()
                 )
                 .logout(logout -> logout

@@ -19,7 +19,7 @@
         <!-- || 안쓴거
         <td><a th:href="@{/board/${board.id}}" th:text="${board.boardTitle}"></a></td>
         -->
-        <td th:text="${board.boardWriter}"></td>
+        <td th:text="${board.memberName}"></td>
         <td th:text="*{#temporals.format(board.boardCreatedTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
         <td th:text="${board.boardHits}"></td>
     </tr>

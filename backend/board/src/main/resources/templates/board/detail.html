@@ -18,7 +18,7 @@
     </tr>
     <tr>
         <th>writer</th>
-        <td th:text="${board.boardWriter}"></td>
+        <td th:text="${board.memberName}"></td>
     </tr>
     <tr>
         <th>date</th>
@@ -39,7 +39,7 @@
 </table>
 
 <button onclick="listReq()">목록</button>
-<span th:if="${sessionEmail == board.boardWriter}">
+<span th:if="${sessionMemberId == board.memberId}">
     <button onclick="updateReq()">수정</button>
     <button onclick="deleteReq()">삭제</button>
 </span>
@@ -113,18 +113,15 @@
 
     }
     const listReq = () => {
-        const page = [[${page}]]; // Controller에서 전달한 현재 페이지
-        location.href = "/board/paging?page=" + page;
+        location.href = "/board/";
     }
     const updateReq = () => {
         const id = [[${board.id}]];
-        const page = [[${page}]];
-        location.href = "/board/update/" + id + "?page=" + page;
+        location.href = "/board/update/" + id;
     }
     const deleteReq = () => {
         const id = [[${board.id}]];
-        const page = [[${page}]];
-        location.href = "/board/delete/" + id + "?page=" + page;
+        location.href = "/board/delete/" + id;
     }
 </script>
 </html>

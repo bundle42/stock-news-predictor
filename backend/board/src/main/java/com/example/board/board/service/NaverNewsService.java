@@ -67,8 +67,7 @@ public class NaverNewsService {
                 BoardDTO boardDTO = new BoardDTO();
                 boardDTO.setBoardTitle(title);
                 boardDTO.setBoardContents(description);
-                boardDTO.setBoardWriter("bb");
-                boardDTO.setBoardPass("bb");
+                boardDTO.setMemberId(1l);
 
                 boardDTO.setSentimentLabel(label);
                 boardDTO.setSentimentScore(score);

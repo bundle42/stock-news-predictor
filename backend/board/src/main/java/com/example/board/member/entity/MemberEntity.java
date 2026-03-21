@@ -1,9 +1,13 @@
 package com.example.board.member.entity;
 
+import com.example.board.board.entity.BoardEntity;
 import com.example.board.member.dto.MemberDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
@@ -22,6 +26,10 @@ public class MemberEntity {
 
     @Column
     private String memberName;
+
+    // JOIN 편함
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardEntity> boards = new ArrayList<>();
 
     public static MemberEntity toMemberEntity(MemberDTO memberDTO) {
         MemberEntity memberEntity = new MemberEntity();
