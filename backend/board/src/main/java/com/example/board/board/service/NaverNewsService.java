@@ -62,7 +62,7 @@ public class NaverNewsService {
                 System.out.println("Python 응답: " + result);
 
                 String label = (String) result.get("label");
-                Double score = Double.valueOf(result.get("score").toString());
+                Double sentimentScore = Double.valueOf(result.get("sentiment_score").toString());
 
                 BoardDTO boardDTO = new BoardDTO();
                 boardDTO.setBoardTitle(title);
@@ -70,7 +70,7 @@ public class NaverNewsService {
                 boardDTO.setMemberId(1l);
 
                 boardDTO.setSentimentLabel(label);
-                boardDTO.setSentimentScore(score);
+                boardDTO.setSentimentScore(sentimentScore);
 
                 boardService.saveFromApi(boardDTO);
             }

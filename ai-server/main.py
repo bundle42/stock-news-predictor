@@ -26,7 +26,18 @@ def analyze_sentiment(request: NewsRequest):
     text = request.content[:512]
     result = sentiment_pipeline(text)
 
+    label = result[0]["label"]
+    score = result[0]["score"]
+
+    if label == "positive":
+        sentiment_score = score
+    elif label == "negative":
+        sentiment_score = -score
+    else:  # neutral
+        sentiment_score = 0.0
+
     return {
-        "label": result[0]["label"],
-        "score": result[0]["score"]
+        "label": label,
+        "confidence": score,
+        "sentiment_score": sentiment_score
     }
