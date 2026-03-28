@@ -22,6 +22,15 @@ public class BoardEntity extends BaseEntity {
     @Column
     private String boardTitle;
 
+    @Column(length = 1000)
+    private String newsLink;
+
+    @Column
+    private String pubDate;
+
+    @Column
+    private String searchQuery;
+
     @Column(length = 500)
     private String boardContents;
 
@@ -45,6 +54,9 @@ public class BoardEntity extends BaseEntity {
     private String sentimentLabel;
 
     @Column
+    private Double sentimentConfidence;
+
+    @Column
     private Double sentimentScore;
 
     public static BoardEntity toSaveEntity(BoardDTO boardDTO) {
@@ -54,8 +66,13 @@ public class BoardEntity extends BaseEntity {
         boardEntity.setBoardHits(0);
         boardEntity.setFileAttached(0); // 파일 없음.
 
-        boardEntity.setSentimentLabel(boardDTO.getSentimentLabel());
+        boardEntity.setSentimentLabel(boardDTO.getLabel());
+        boardEntity.setSentimentConfidence(boardDTO.getConfidence());
         boardEntity.setSentimentScore(boardDTO.getSentimentScore());
+
+        boardEntity.setNewsLink(boardDTO.getNewsLink());
+        boardEntity.setPubDate(boardDTO.getPubDate());
+        boardEntity.setSearchQuery(boardDTO.getSearchQuery());
 
         return boardEntity;
     }

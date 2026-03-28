@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>주가 예측 결과</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Pretendard", "Noto Sans KR", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f4f7fb, #e9eef7);
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 18px 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            box-shadow: 0 6px 20px rgba(185, 28, 28, 0.08);
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            margin-bottom: 24px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .big-number {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .small-desc {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .up {
+            color: #16a34a;
+            font-weight: 800;
+        }
+
+        .down {
+            color: #dc2626;
+            font-weight: 800;
+        }
+
+        .neutral {
+            color: #2563eb;
+            font-weight: 800;
+        }
+
+        .info-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .value {
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        thead {
+            background: #f8fafc;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: center;
+            border-bottom: 1px solid #edf2f7;
+            font-size: 14px;
+        }
+
+        th {
+            color: #475569;
+            font-weight: 800;
+        }
+
+        tbody tr:hover {
+            background: #f9fbff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .badge-down {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .badge-up {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 18px;
+        }
+
+        .feature-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .feature-tag {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            color: #6b7280;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 26px;
+            }
+
+            .big-number {
+                font-size: 26px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1 class="page-title">📈 주가 예측 결과</h1>
+    <p class="page-subtitle">LSTM 기반 종가 예측 결과를 시각적으로 확인할 수 있습니다.</p>
+
+    <!-- 에러 출력 -->
+    <div th:if="${errorMessage != null}" class="alert-error">
+        ❌ 오류 발생: <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- prediction 존재할 때 -->
+    <div th:if="${prediction != null}">
+
+        <!-- prediction 안에 lstm_result가 있다고 가정 -->
+        <div th:with="result=${prediction['lstm_result']}">
+
+            <!-- 상단 요약 카드 -->
+            <div class="grid grid-4">
+
+                <div class="card">
+                    <div class="card-title">예측 다음 종가</div>
+                    <div class="big-number"
+                         th:text="${#numbers.formatDecimal(result['next_prediction']['predicted_next_close'], 1, 'COMMA', 2, 'POINT')} + ' 원'">
+                        177,620.78 원
+                    </div>
+                    <div class="small-desc">다음 거래일 예상 종가</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">예상 등락폭</div>
+                    <div class="big-number"
+                         th:classappend="${result['next_prediction']['predicted_change'] < 0} ? 'down' : 'up'"
+                         th:text="${#numbers.formatDecimal(result['next_prediction']['predicted_change'], 1, 'COMMA', 2, 'POINT')} + ' 원'">
+                        -2,479.22 원
+                    </div>
+                    <div class="small-desc">전일 대비 변동 예상치</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">예상 등락률</div>
+                    <div class="big-number"
+                         th:classappend="${result['next_prediction']['predicted_change_pct'] < 0} ? 'down' : 'up'"
+                         th:text="${#numbers.formatDecimal(result['next_prediction']['predicted_change_pct'], 1, 'COMMA', 2, 'POINT')} + '%'">
+                        -1.38%
+                    </div>
+                    <div class="small-desc">전일 대비 퍼센트 변화</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">예측 방향</div>
+                    <div class="big-number">
+                        <span th:if="${result['next_prediction']['direction'] == 'DOWN'}"
+                              class="badge badge-down">📉 하락 (DOWN)</span>
+                        <span th:if="${result['next_prediction']['direction'] == 'UP'}"
+                              class="badge badge-up">📈 상승 (UP)</span>
+                    </div>
+                    <div class="small-desc">모델이 예측한 방향</div>
+                </div>
+            </div>
+
+            <!-- 중간 정보 카드 -->
+            <div class="grid grid-2">
+
+                <!-- 모델 정보 -->
+                <div class="card">
+                    <h2 class="section-title">🤖 모델 정보</h2>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="label">시퀀스 길이</span>
+                            <span class="value" th:text="${result['sequence_length']}">5</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">RMSE</span>
+                            <span class="value"
+                                  th:text="${#numbers.formatDecimal(result['validation_metrics']['rmse'], 1, 'COMMA', 2, 'POINT')}">
+                                11898.69
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">MAE</span>
+                            <span class="value"
+                                  th:text="${#numbers.formatDecimal(result['validation_metrics']['mae'], 1, 'COMMA', 2, 'POINT')}">
+                                8641.63
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <div class="card-title">사용된 Feature</div>
+                        <div class="feature-box">
+                            <span class="feature-tag"
+                                  th:each="feature : ${result['feature_cols']}"
+                                  th:text="${feature}">
+                                close
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 최근 입력 정보 -->
+                <div class="card">
+                    <h2 class="section-title">📅 최신 입력 정보</h2>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="label">마지막 데이터 날짜</span>
+                            <span class="value" th:text="${result['latest_input']['last_date']}">2026-03-26</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">마지막 종가</span>
+                            <span class="value"
+                                  th:text="${#numbers.formatDecimal(result['latest_input']['last_close'], 1, 'COMMA', 2, 'POINT')} + ' 원'">
+                                180,100.00 원
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">예측 종가</span>
+                            <span class="value"
+                                  th:text="${#numbers.formatDecimal(result['next_prediction']['predicted_next_close'], 1, 'COMMA', 2, 'POINT')} + ' 원'">
+                                177,620.78 원
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">예상 방향</span>
+                            <span class="value"
+                                  th:text="${result['next_prediction']['direction']}">DOWN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 과거 예측 테이블 -->
+            <div class="card">
+                <h2 class="section-title">📊 과거 예측 결과</h2>
+                <p class="small-desc" style="margin-bottom: 18px;">
+                    실제 종가와 모델 예측 종가를 비교한 기록입니다.
+                </p>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>실제 종가</th>
+                            <th>예측 종가</th>
+                            <th>실제 방향</th>
+                            <th>예측 방향</th>
+                            <th>방향 적중</th>
+                            <th>오차</th>
+                            <th>오차율</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${result['historical_predictions']}">
+                            <td th:text="${item['date']}">2026-03-25</td>
+
+                            <td th:text="${#numbers.formatDecimal(item['actual_target_close'], 1, 'COMMA', 2, 'POINT')} + ' 원'">
+                                180,100.00 원
+                            </td>
+
+                            <td th:text="${#numbers.formatDecimal(item['predicted_target_close'], 1, 'COMMA', 2, 'POINT')} + ' 원'">
+                                185,790.27 원
+                            </td>
+
+                            <!-- 실제 방향 -->
+                            <td>
+                                <span th:if="${item['actual_direction'] == 'UP'}" class="badge badge-up">📈 상승</span>
+                                <span th:if="${item['actual_direction'] == 'DOWN'}" class="badge badge-down">📉 하락</span>
+                                <span th:if="${item['actual_direction'] == 'SAME'}" class="badge">➖ 보합</span>
+                            </td>
+
+                            <!-- 예측 방향 -->
+                            <td>
+                                <span th:if="${item['predicted_direction'] == 'UP'}" class="badge badge-up">📈 상승</span>
+                                <span th:if="${item['predicted_direction'] == 'DOWN'}" class="badge badge-down">📉 하락</span>
+                                <span th:if="${item['predicted_direction'] == 'SAME'}" class="badge">➖ 보합</span>
+                            </td>
+
+                            <!-- 방향 적중 여부 -->
+                            <td>
+                                <span th:if="${item['direction_match']}" class="badge badge-hit">✅ 적중</span>
+                                <span th:if="${!item['direction_match']}" class="badge badge-miss">❌ 실패</span>
+                            </td>
+
+                            <!-- 오차 -->
+                            <td th:with="error=${item['predicted_target_close'] - item['actual_target_close']}"
+                                th:classappend="${error < 0} ? 'down' : 'up'">
+                                <span th:text="${#numbers.formatDecimal(error, 1, 'COMMA', 2, 'POINT')} + ' 원'">
+                                5,690.27 원
+                                </span>
+                            </td>
+
+                            <!-- 오차율 -->
+                            <td th:with="rate=${((item['predicted_target_close'] - item['actual_target_close']) / item['actual_target_close']) * 100}"
+                                th:classappend="${rate < 0} ? 'down' : 'up'">
+                                <span th:text="${#numbers.formatDecimal(rate, 1, 'COMMA', 2, 'POINT')} + '%'">
+                                3.16%
+                                </span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="footer-note">
+                ※ 본 예측은 LSTM 기반 머신러닝 결과이며 실제 투자 판단의 책임은 사용자에게 있습니다.
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -5,6 +5,7 @@ import com.example.board.board.dto.CommentDTO;
 import com.example.board.board.service.BoardService;
 import com.example.board.board.service.CommentService;
 import com.example.board.board.service.NaverNewsService;
+import com.example.board.board.service.PredictService;
 import com.example.board.member.dto.MemberDTO;
 import com.example.board.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -115,7 +117,7 @@ public class BoardController {
     // 네이버 뉴스 가져와서 저장
     @GetMapping("/news/import")
     public String importNews() {
-        naverNewsService.saveNewsToBoard();
+        naverNewsService.saveNewsToBoard("삼성전자");
         return "redirect:/board/";
     }
 }

@@ -114,6 +114,16 @@ public class BoardService {
     }
 
     public void saveFromApi(BoardDTO boardDTO) {
-        boardRepository.save(BoardEntity.toSaveEntity(boardDTO));
+        MemberEntity member = memberRepository.findById(boardDTO.getMemberId())
+                .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
+
+        BoardEntity boardEntity = BoardEntity.toSaveEntity(boardDTO);
+        boardEntity.setMember(member);
+
+        boardRepository.save(boardEntity);
+    }
+
+    public boolean existsByTitle(String title) {
+        return boardRepository.existsByBoardTitle(title);
     }
 }

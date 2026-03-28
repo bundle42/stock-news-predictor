@@ -9,7 +9,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -24,12 +27,11 @@ public class NaverNewsService {
     @Value("${naver.client-secret}")
     private String clientSecret;
 
-    public void saveNewsToBoard() {
+    public void saveNewsToBoard(String query) {
 
         try {
-            String query = "삼성전자";
             String apiURL = "https://openapi.naver.com/v1/search/news.json?query="
-                    + query + "&display=3&sort=date";
+                    + query + "&display=100&sort=date";
 
             RestTemplate restTemplate = new RestTemplate();
 
@@ -52,24 +54,44 @@ public class NaverNewsService {
 
                 String title = item.get("title").asText();
                 String description = item.get("description").asText();
+                String link = item.get("link").asText();
+
+                String pubDate = item.get("pubDate").asText();
+                // 1. 문자열 → ZonedDateTime
+                DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+                ZonedDateTime zonedDateTime = ZonedDateTime.parse(pubDate, inputFormatter);
+                // 2. ZonedDateTime → 원하는 형식 문자열
+                DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yy-MM-dd-HH-mm-ss");
+                String formattedPubDate = zonedDateTime.format(outputFormatter);
 
                 // HTML 태그 제거
                 title = title.replaceAll("<[^>]*>", "");
                 description = description.replaceAll("<[^>]*>", "");
+
+                // 이미 저장된 기사면 건너뛰기
+                if (boardService.existsByTitle(title)) {
+                    System.out.print("중복 기사 스킵: " + title);
+                    continue;
+                }
 
                 // 파이썬으로 보낸 요청을 받은 응답
                 Map<String, Object> result = sendToPythonRead(title);
                 System.out.println("Python 응답: " + result);
 
                 String label = (String) result.get("label");
+                Double confidence = Double.valueOf(result.get("confidence").toString());
                 Double sentimentScore = Double.valueOf(result.get("sentiment_score").toString());
 
                 BoardDTO boardDTO = new BoardDTO();
                 boardDTO.setBoardTitle(title);
                 boardDTO.setBoardContents(description);
-                boardDTO.setMemberId(1l);
+                boardDTO.setNewsLink(link);
+                boardDTO.setPubDate(formattedPubDate);
+                boardDTO.setSearchQuery(query);
+                boardDTO.setMemberId(1L);
 
-                boardDTO.setSentimentLabel(label);
+                boardDTO.setLabel(label);
+                boardDTO.setConfidence(confidence);
                 boardDTO.setSentimentScore(sentimentScore);
 
                 boardService.saveFromApi(boardDTO);
