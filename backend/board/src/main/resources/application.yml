@@ -1,14 +1,14 @@
 # 서버 포트 설정
 server:
-  port: 8082
+  port: ${PORT:8082}
 
 # database 연동 설정
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/db_codingrecipe?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: user_codingrecipe
-    password: 1234
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   thymeleaf:
     cache: false
 
@@ -23,3 +23,7 @@ spring:
 naver:
   client-id: ${NAVER_CLIENT_ID}
   client-secret: ${NAVER_CLIENT_SECRET}
+
+# Fast API
+ai:
+  server-url: ${AI_SERVER_URL}

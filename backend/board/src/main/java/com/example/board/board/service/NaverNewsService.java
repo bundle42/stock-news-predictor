@@ -27,6 +27,9 @@ public class NaverNewsService {
     @Value("${naver.client-secret}")
     private String clientSecret;
 
+    @Value("${ai.server-url}")
+    private String aiServerUrl;
+
     public void saveNewsToBoardMultiple(String... queries) {
         for (String query : queries) {
             saveNewsToBoard(query);
@@ -105,7 +108,7 @@ public class NaverNewsService {
     // 파이썬 호출 코드(코드 항상 동일)
     public Map<String, Object> sendToPythonRead(String content) {
 
-        String url = "http://localhost:8003/analyze";
+        String url = aiServerUrl + "/analyze";
 
         RestTemplate restTemplate = new RestTemplate();
 
