@@ -27,6 +27,12 @@ public class NaverNewsService {
     @Value("${naver.client-secret}")
     private String clientSecret;
 
+    public void saveNewsToBoardMultiple(String... queries) {
+        for (String query : queries) {
+            saveNewsToBoard(query);
+        }
+    }
+
     public void saveNewsToBoard(String query) {
 
         try {
@@ -67,12 +73,6 @@ public class NaverNewsService {
                 // HTML 태그 제거
                 title = title.replaceAll("<[^>]*>", "");
                 description = description.replaceAll("<[^>]*>", "");
-
-                // 이미 저장된 기사면 건너뛰기
-                if (boardService.existsByTitle(title)) {
-                    System.out.print("중복 기사 스킵: " + title);
-                    continue;
-                }
 
                 // 파이썬으로 보낸 요청을 받은 응답
                 Map<String, Object> result = sendToPythonRead(title);

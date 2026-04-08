@@ -27,7 +27,7 @@ sentiment_pipeline = pipeline(
 )
 
 @app.post("/analyze")
-def analyze_sentiment(request: NewsRequest):
+def analyze_title(request: NewsRequest):
     text = request.content[:512]
     result = sentiment_pipeline(text)
 
@@ -48,11 +48,20 @@ def analyze_sentiment(request: NewsRequest):
     }
 
 @app.post("/predict", response_model=None)
-async def predict(features: List[Dict[str, Any]]):
+async def predict(request: Dict[str, Any]):
+    stock_name = request.get("stockName")
+    features = request.get("features", [])
+
+    if not stock_name:
+        return {"error": "stockName이 없습니다."}
+
+    if not features:
+        return {"error": "features가 없습니다."}
+
     # -----------------------------
     # 1) 주가 데이터 불러오기
     # -----------------------------
-    stock_df = yfinance_loader.download_stock_data().copy()
+    stock_df = yfinance_loader.download_stock_data(stock_name).copy()
 
     # stock_df 예시 컬럼:
     # ["date", "open", "high", "low", "close", "volume", ...]
@@ -308,6 +317,7 @@ async def predict(features: List[Dict[str, Any]]):
     train_df_return["date"] = train_df_return["date"].dt.strftime("%Y-%m-%d")
 
     return {
+        "stock_name": stock_name,
         "prediction_data": merged_df_return.to_dict(orient="records"),
         "train_data": train_df_return.to_dict(orient="records"),
         "lstm_result": lstm_result

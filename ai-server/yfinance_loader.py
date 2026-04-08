@@ -2,12 +2,21 @@ import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta, date
 
-def download_stock_data():
-    ticker = "005930.KS"
+def download_stock_data(stock_name):
+    ticker_map = {
+        "삼성전자": "005930.KS",
+        "SK하이닉스": "000660.KS",
+        "현대차": "005380.KS"
+    }
+
+    ticker = ticker_map.get(stock_name)
+
+    if ticker is None:
+        raise ValueError(f"지원하지 않는 종목입니다: {stock_name}")
 
     start_date = datetime(2025, 11, 24)
-    # end_date = date.today() - timedelta(days=1)
-    end_date = datetime(2026, 3, 26)
+    end_date = date.today() - timedelta(days=1)
+    # end_date = datetime(2026, 3, 26)
 
     df = yf.download(
         ticker,

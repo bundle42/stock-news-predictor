@@ -2,10 +2,7 @@ package com.example.board.board.controller;
 
 import com.example.board.board.dto.BoardDTO;
 import com.example.board.board.dto.CommentDTO;
-import com.example.board.board.service.BoardService;
-import com.example.board.board.service.CommentService;
-import com.example.board.board.service.NaverNewsService;
-import com.example.board.board.service.PredictService;
+import com.example.board.board.service.*;
 import com.example.board.member.dto.MemberDTO;
 import com.example.board.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +25,7 @@ public class BoardController {
     private final CommentService commentService;
     private final NaverNewsService naverNewsService;
     private final MemberService memberService;
+    private final BoardCsvImporterService boardCsvImporterService;
 
     // 글쓰기 페이지
     @GetMapping("/save")
@@ -117,7 +115,14 @@ public class BoardController {
     // 네이버 뉴스 가져와서 저장
     @GetMapping("/news/import")
     public String importNews() {
-        naverNewsService.saveNewsToBoard("삼성전자");
+        naverNewsService.saveNewsToBoardMultiple("삼성전자", "SK하이닉스", "현대차");
+        return "redirect:/board/";
+    }
+
+    // Csv 뉴스 가져와서 저장
+    @GetMapping("/news/csvimport")
+    public String importCsvNews() {
+        boardCsvImporterService.importCsvToMySQL();
         return "redirect:/board/";
     }
 }

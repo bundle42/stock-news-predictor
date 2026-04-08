@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,13 +21,13 @@ public class PredictService {
     private final BoardRepository boardRepository;
     private final DailyFeatureService dailyFeatureService;
 
-    public Map<String, Object> start() {
+    public Map<String, Object> start(String stockName) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd-HH-mm-ss");
 
         String startDate = "25-11-24-00-00-00";
         String endDate = LocalDateTime.now().format(formatter);
-        String searchQuery = "삼성전자";
+        String searchQuery = stockName;
 
         List<BoardDTO> recentNews = boardRepository
                 .findByPubDateBetweenAndSearchQueryContainingOrderByPubDateAsc(startDate, endDate, searchQuery)
@@ -57,7 +58,11 @@ public class PredictService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<List<Map<String, Object>>> request = new HttpEntity<>(dailyFeatures, headers);
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("stockName", stockName);
+        requestBody.put("features", dailyFeatures);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
