@@ -1,12 +1,12 @@
 from transformers import pipeline
 
-# 한국어 모델 추천 (처음 실행 시 다운로드됨) 서울대 NLP
-sentiment_pipeline = pipeline(
-    "text-classification",
-    model="snunlp/KR-FinBert-SC"
-)
-
 def load_analyze(text):
+    # 한국어 모델 추천 (처음 실행 시 다운로드됨) 서울대 NLP
+    sentiment_pipeline = pipeline(
+        "text-classification",
+        model="snunlp/KR-FinBert-SC"
+    )
+
     result = sentiment_pipeline(text)
 
     label = result[0]["label"]
