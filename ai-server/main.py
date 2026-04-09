@@ -1,8 +1,8 @@
 
 from fastapi import FastAPI
 from pydantic import BaseModel
-from transformers import pipeline
 from typing import List, Dict, Any
+import pipeline_loader
 import yfinance_loader
 import lstm_v1
 import pandas as pd
@@ -20,31 +20,16 @@ class NewsRequest(BaseModel):
 def read_news(request: NewsRequest):
     return {"message": f"뉴스 내용이 수신되었습니다: {request.content[:100]}... (총 {len(request.content)}자)"}
 
-# 한국어 모델 추천 (처음 실행 시 다운로드됨) 서울대 NLP
-sentiment_pipeline = pipeline(
-    "text-classification",
-    model="snunlp/KR-FinBert-SC"
-)
-
 @app.post("/analyze")
 def analyze_title(request: NewsRequest):
     text = request.content[:512]
-    result = sentiment_pipeline(text)
-
-    label = result[0]["label"]
-    confidence = result[0]["score"]
-
-    if label == "positive":
-        sentiment_score = confidence
-    elif label == "negative":
-        sentiment_score = -confidence
-    else:  # neutral
-        sentiment_score = 0.0
+    
+    pipeline_loader_result = pipeline_loader.load_analyze(text)
 
     return {
-        "label": label,
-        "confidence": confidence,
-        "sentiment_score": sentiment_score
+        "label": pipeline_loader_result["label"],
+        "confidence": pipeline_loader_result["confidence"],
+        "sentiment_score": pipeline_loader_result["sentiment_score"]
     }
 
 @app.post("/predict", response_model=None)
