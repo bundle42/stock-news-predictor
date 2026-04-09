@@ -3,6 +3,7 @@ package com.example.board.board.service;
 import com.example.board.board.dto.BoardDTO;
 import com.example.board.board.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -20,6 +21,9 @@ public class PredictService {
 
     private final BoardRepository boardRepository;
     private final DailyFeatureService dailyFeatureService;
+
+    @Value("${ai.server-url}")
+    private String aiServerUrl;
 
     public Map<String, Object> start(String stockName) {
 
@@ -52,7 +56,7 @@ public class PredictService {
         dailyFeatures.forEach(System.out::println);
         System.out.println("==========================");
 
-        String url = "http://localhost:8003/predict";
+        String url = aiServerUrl + "/predict";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
