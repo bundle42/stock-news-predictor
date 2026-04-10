@@ -8,6 +8,7 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 description = 'Board project for Spring Boot'
 
+/***
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
@@ -19,6 +20,7 @@ configurations {
 		extendsFrom annotationProcessor
 	}
 }
+***/
 
 repositories {
 	mavenCentral()
