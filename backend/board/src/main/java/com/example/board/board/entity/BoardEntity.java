@@ -19,7 +19,7 @@ public class BoardEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto_increment
     private Long id;
 
-    @Column(unique = true)
+    @Column
     private String boardTitle;
 
     @Column(length = 1000)
