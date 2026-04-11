@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List, Dict, Any
-import pipeline_loader
+import pipeline_loader2
 import yfinance_loader
 import lstm_v1
 import pandas as pd
@@ -24,7 +24,7 @@ def read_news(request: NewsRequest):
 def analyze_title(request: NewsRequest):
     text = request.content[:512]
     
-    pipeline_loader_result = pipeline_loader.load_analyze(text)
+    pipeline_loader_result = pipeline_loader2.load_analyze(text)
 
     return {
         "label": pipeline_loader_result["label"],
