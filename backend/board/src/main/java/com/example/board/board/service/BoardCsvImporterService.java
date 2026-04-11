@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardCsvImporterService {
 
-    private static final String CSV_DIR_PATH = "C:/springboot_img/";
+    private static final String CSV_DIR_PATH = System.getProperty("user.dir") + "/springboot_data/";
     private static final long DEFAULT_MEMBER_ID = 1L;
     private static final int BATCH_SIZE = 500;
 

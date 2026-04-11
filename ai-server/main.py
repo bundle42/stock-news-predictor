@@ -24,13 +24,31 @@ def read_news(request: NewsRequest):
 def analyze_title(request: NewsRequest):
     text = request.content[:512]
     
-    pipeline_loader_result = pipeline_loader2.load_analyze(text)
+    pipeline_loader_result = pipeline_loader.load_analyze(text)
 
     return {
         "label": pipeline_loader_result["label"],
         "confidence": pipeline_loader_result["confidence"],
         "sentiment_score": pipeline_loader_result["sentiment_score"]
     }
+
+@app.post("/analyze-batch")
+def analyze_titles(request: dict):
+    contents = request["contents"]  # 리스트 받기
+
+    results = []
+
+    for text in contents:
+        text = text[:512]
+        result = pipeline_loader2.load_analyze(text)
+
+        results.append({
+            "label": result["label"],
+            "confidence": result["confidence"],
+            "sentiment_score": result["sentiment_score"]
+        })
+
+    return results
 
 @app.post("/predict", response_model=None)
 async def predict(request: Dict[str, Any]):

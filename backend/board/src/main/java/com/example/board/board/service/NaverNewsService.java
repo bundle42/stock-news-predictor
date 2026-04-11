@@ -6,14 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -59,37 +58,56 @@ public class NaverNewsService {
             JsonNode root = mapper.readTree(body);
             JsonNode items = root.get("items");
 
+            List<String> titles = new ArrayList<>();
+            List<String> descriptions = new ArrayList<>();
+            List<String> links = new ArrayList<>();
+            List<String> pubDates = new ArrayList<>();
+
             for (JsonNode item : items) {
 
-                String title = item.get("title").asText();
-                String description = item.get("description").asText();
+                String title = item.get("title").asText().replaceAll("<[^>]*>", "");
+                String description = item.get("description").asText().replaceAll("<[^>]*>", "");
                 String link = item.get("link").asText();
 
                 String pubDate = item.get("pubDate").asText();
-                // 1. 문자열 → ZonedDateTime
-                DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+
+                DateTimeFormatter inputFormatter =
+                        DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
                 ZonedDateTime zonedDateTime = ZonedDateTime.parse(pubDate, inputFormatter);
-                // 2. ZonedDateTime → 원하는 형식 문자열
-                DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yy-MM-dd-HH-mm-ss");
+
+                DateTimeFormatter outputFormatter =
+                        DateTimeFormatter.ofPattern("yy-MM-dd-HH-mm-ss");
+
                 String formattedPubDate = zonedDateTime.format(outputFormatter);
 
-                // HTML 태그 제거
-                title = title.replaceAll("<[^>]*>", "");
-                description = description.replaceAll("<[^>]*>", "");
+                // 리스트에 저장
+                titles.add(title);
+                descriptions.add(description);
+                links.add(link);
+                pubDates.add(formattedPubDate);
+            }
 
-                // 파이썬으로 보낸 요청을 받은 응답
-                Map<String, Object> result = sendToPythonRead(title);
-                System.out.println("Python 응답: " + result);
+            List<Map<String, Object>> results = sendToPythonBatch(titles);
+
+            if (results == null || results.size() != titles.size()) {
+                System.out.println("Python 응답 이상 발생");
+                return;
+            }
+
+            int size = Math.min(titles.size(), results.size());
+            for (int i = 0; i < size; i++) {
+
+                Map<String, Object> result = results.get(i);
 
                 String label = (String) result.get("label");
                 Double confidence = Double.valueOf(result.get("confidence").toString());
                 Double sentimentScore = Double.valueOf(result.get("sentiment_score").toString());
 
                 BoardDTO boardDTO = new BoardDTO();
-                boardDTO.setBoardTitle(title);
-                boardDTO.setBoardContents(description);
-                boardDTO.setNewsLink(link);
-                boardDTO.setPubDate(formattedPubDate);
+                boardDTO.setBoardTitle(titles.get(i));
+                boardDTO.setBoardContents(descriptions.get(i));
+                boardDTO.setNewsLink(links.get(i));
+                boardDTO.setPubDate(pubDates.get(i));
                 boardDTO.setSearchQuery(query);
                 boardDTO.setMemberId(1L);
 
@@ -100,29 +118,36 @@ public class NaverNewsService {
                 boardService.saveFromApi(boardDTO);
             }
 
+            System.out.println("뉴스 개수: " + titles.size());
+            System.out.println("Python 결과 개수: " + results.size());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // 파이썬 호출 코드(코드 항상 동일)
-    public Map<String, Object> sendToPythonRead(String content) {
+    // 파이썬 호출 코드(배치로 여러개 한번에)
+    public List<Map<String, Object>> sendToPythonBatch(List<String> contents) {
 
-        String url = aiServerUrl + "/analyze";
+        String url = aiServerUrl + "/analyze-batch";
 
-        RestTemplate restTemplate = new RestTemplate();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5000);  // 5초
+        factory.setReadTimeout(60000);    // 60포
+
+        RestTemplate restTemplate = new RestTemplate(factory);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("content", content);
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("contents", contents);
 
-        HttpEntity<Map<String, String>> request =
+        HttpEntity<Map<String, Object>> request =
                 new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<Map> response =
-                restTemplate.postForEntity(url, request, Map.class);
+        ResponseEntity<List> response =
+                restTemplate.postForEntity(url, request, List.class);
 
         return response.getBody();
     }
