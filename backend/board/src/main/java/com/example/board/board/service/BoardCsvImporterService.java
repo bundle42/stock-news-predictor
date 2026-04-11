@@ -65,9 +65,14 @@ public class BoardCsvImporterService {
 
                     String date = getValue(line, 0);
                     String title = getValue(line, 1);
+                    title = title
+                            .replace("“", "\"")
+                            .replace("”", "\"")
+                            .replace("‘", "'")
+                            .replace("’", "'")
+                            .trim();
                     // 🔥 title 중복이면 스킵
-                    if (title != null && !title.isBlank()
-                            && boardRepository.existsByBoardTitle(title)) {
+                    if (boardRepository.existsByBoardTitle(title)) {
                         continue;
                     }
                     String label = getValue(line, 2);
