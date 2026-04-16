@@ -27,3 +27,6 @@ naver:
 # Fast API
 ai:
   server-url: ${AI_SERVER_URL}
+
+file:
+  upload-dir: ${UPLOAD_DIR}

@@ -8,6 +8,7 @@ import com.example.board.board.repository.BoardRepository;
 import com.example.board.member.entity.MemberEntity;
 import com.example.board.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,10 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final BoardFileRepository boardFileRepository;
     private final MemberRepository memberRepository;
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
     public void save(BoardDTO boardDTO, String email) throws IOException {
         MemberEntity member = memberRepository
                 .findByMemberEmail(email)
@@ -41,15 +46,18 @@ public class BoardService {
             String originalFilename = boardFile.getOriginalFilename();
             String storedFileName = System.currentTimeMillis() + "_" + originalFilename;
 
-            String savePath = "C:/springboot_img/" + storedFileName;
+            File dir = new File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs(); // 폴더 없으면 생성
+            }
 
+            String savePath = uploadDir + File.separator + storedFileName;
             boardFile.transferTo(new File(savePath));
 
             BoardEntity boardEntity = BoardEntity.toSaveFileEntity(boardDTO);
             boardEntity.setMember(member);
 
-            Long savedId = boardRepository.save(boardEntity).getId();
-            BoardEntity board = boardRepository.findById(savedId).get();
+            BoardEntity board = boardRepository.save(boardEntity);
 
             BoardFileEntity boardFileEntity =
                     BoardFileEntity.toBoardFileEntity(board, originalFilename, storedFileName);
@@ -103,9 +111,11 @@ public class BoardService {
         boardRepository.deleteById(id);
     }
 
+    @Transactional
     public List<BoardDTO> findByMemberEmail(String email) {
 
-        MemberEntity member = memberRepository.findByMemberEmail(email).get();
+        MemberEntity member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
 
         return boardRepository.findAllByMemberId(member.getId())
                 .stream()

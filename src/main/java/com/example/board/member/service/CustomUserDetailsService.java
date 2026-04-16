@@ -3,6 +3,7 @@ package com.example.board.member.service;
 import com.example.board.member.entity.MemberEntity;
 import com.example.board.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new User(
                 member.getMemberEmail(),
                 member.getMemberPassword(),
-                Collections.emptyList()
+                Collections.singletonList(
+                        new SimpleGrantedAuthority(member.getMemberRole())
+                )
         );
     }
 }

@@ -27,6 +27,9 @@ public class MemberEntity {
     @Column
     private String memberName;
 
+    @Column
+    private String memberRole;
+
     // JOIN 편함
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardEntity> boards = new ArrayList<>();
@@ -36,6 +39,7 @@ public class MemberEntity {
         memberEntity.setMemberEmail(memberDTO.getMemberEmail());
         memberEntity.setMemberPassword(memberDTO.getMemberPassword());
         memberEntity.setMemberName(memberDTO.getMemberName());
+        memberEntity.setMemberRole("ROLE_USER");
         return memberEntity;
     }
 

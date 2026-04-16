@@ -13,21 +13,54 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, e) -> {
+                            String uri = req.getRequestURI();
+
+                            if (uri.startsWith("/api")) {
+                                res.setStatus(401);
+                            } else {
+                                res.sendRedirect("/member/login");
+                            }
+                        })
+                        .accessDeniedHandler((req, res, e) -> {
+                            String uri = req.getRequestURI();
+
+                            if (uri.startsWith("/api")) {
+                                res.setStatus(403);
+                            } else {
+                                res.sendError(403);
+                            }
+                        })
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/member/**").permitAll()
-                        .requestMatchers("/board/**").authenticated()
+
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        .requestMatchers("/api/**", "/board/**").authenticated()
+
                         .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
-                        .loginPage("/member/login")
                         .loginProcessingUrl("/member/login")
-                        .defaultSuccessUrl("/member/main", true)
+                        .successHandler((req, res, auth) -> {
+                            res.setStatus(200);
+                        })
+                        .failureHandler((req, res, e) -> {
+                            res.setStatus(401);
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/member/logout")
-                        .logoutSuccessUrl("/")
+                        .logoutSuccessHandler((req, res, auth) -> {
+                            res.setStatus(200);
+                        })
                 )
                 .build();
     }

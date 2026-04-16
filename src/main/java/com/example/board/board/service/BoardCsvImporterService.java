@@ -8,6 +8,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +24,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardCsvImporterService {
 
-    private static final String CSV_DIR_PATH = System.getProperty("user.dir") + "/springboot_data/";
+    @Value("${file.upload-dir}")
+    private String csvDir;
+
     private static final long DEFAULT_MEMBER_ID = 1L;
     private static final int BATCH_SIZE = 500;
 
@@ -38,7 +41,11 @@ public class BoardCsvImporterService {
 
         int totalCount = 0;
 
-        File dir = new File(CSV_DIR_PATH);
+        File dir = new File(csvDir);
+
+        if (!dir.exists()) {
+            throw new RuntimeException("CSV 디렉토리가 존재하지 않습니다: " + dir.getAbsolutePath());
+        }
 
         File[] csvFiles = dir.listFiles((d, name) ->
                 name.startsWith("news_sentiment") && name.endsWith(".csv"));

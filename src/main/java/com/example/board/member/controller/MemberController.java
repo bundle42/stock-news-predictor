@@ -3,6 +3,7 @@ package com.example.board.member.controller;
 import com.example.board.member.dto.MemberDTO;
 import com.example.board.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -35,14 +36,6 @@ public class MemberController {
     @GetMapping("/login")
     public String loginForm() {
         return "member/login";
-    }
-
-    @GetMapping("/")
-    public String findAll(Model model) {
-        List<MemberDTO> memberDTOList = memberService.findAll();
-        // 어떠한 html로 가져갈 데이터가 있다면 model사용
-        model.addAttribute("memberList", memberDTOList);
-        return "member/list";
     }
 
     @GetMapping("/main")  // 고정 경로 먼저

@@ -5,13 +5,14 @@
     <title>Title</title>
 </head>
 <body>
-<h2>list.html</h2>
+<h2>members.html</h2>
 <table>
     <tr>
         <th>id</th>
         <th>memberEmail</th>
         <th>memberPassword</th>
         <th>memberName</th>
+        <th>memberRole</th>
         <th>상세조회</th>
         <th>삭제</th>
     </tr>
@@ -20,6 +21,7 @@
         <td th:text="${member.memberEmail}"></td>
         <td th:text="${member.memberPassword}"></td>
         <td th:text="${member.memberName}"></td>
+        <td th:text="${member.memberRole}"></td>
         <td>
             <!-- query string /member?id=1
                 rest api /member/1 -->
