@@ -48,11 +48,14 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginProcessingUrl("/member/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
                         .successHandler((req, res, auth) -> {
                             res.setStatus(200);
                         })
                         .failureHandler((req, res, e) -> {
                             res.setStatus(401);
+                            e.printStackTrace();
                         })
                         .permitAll()
                 )
