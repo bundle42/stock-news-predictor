@@ -22,7 +22,7 @@ public class PredictService {
     private final BoardRepository boardRepository;
     private final DailyFeatureService dailyFeatureService;
 
-    @Value("${ai.server-url}")
+    @Value("${app.ai-server-url}")
     private String aiServerUrl;
 
     public Map<String, Object> start(String stockName) {

@@ -1,6 +1,6 @@
 # 서버 포트 설정
 server:
-  port: ${PORT:8082}
+  port: ${PORT:8080}
 
 # database 연동 설정
 spring:
@@ -24,9 +24,10 @@ naver:
   client-id: ${NAVER_CLIENT_ID}
   client-secret: ${NAVER_CLIENT_SECRET}
 
-# Fast API
-ai:
-  server-url: ${AI_SERVER_URL}
+# URL 링크
+app:
+  ai-server-url: ${AI_SERVER_URL}
+  frontend-url: ${FRONTEND_URL}
 
 file:
   upload-dir: ${UPLOAD_DIR}

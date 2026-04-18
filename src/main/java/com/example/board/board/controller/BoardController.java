@@ -30,7 +30,6 @@ public class BoardController {
     // 글쓰기 페이지
     @GetMapping("/save")
     public String saveForm() {
-        // Thymeleaf에서 #authentication.name 사용 → model에 이메일 안 넣어도 됨
         return "board/save";
     }
 
@@ -44,11 +43,16 @@ public class BoardController {
         return "redirect:/board/";
     }
 
-    // 전체 게시글 목록
     @GetMapping("/")
-    public String findAll(Model model) {
-        List<BoardDTO> boardDTOList = boardService.findAll();
+    public String findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            Model model
+    ) {
+        List<BoardDTO> boardDTOList = boardService.findAll(page, size);
         model.addAttribute("boardList", boardDTOList);
+        model.addAttribute("currentPage", page);
+
         return "board/list";
     }
 

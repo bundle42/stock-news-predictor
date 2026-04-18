@@ -9,6 +9,8 @@ import com.example.board.member.entity.MemberEntity;
 import com.example.board.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,13 +70,14 @@ public class BoardService {
     }
 
     @Transactional
-    public List<BoardDTO> findAll() {
-        List<BoardEntity> boardEntityList = boardRepository.findTop100ByOrderByIdDesc();
-        List<BoardDTO> boardDTOList = new ArrayList<>();
-        for (BoardEntity boardEntity: boardEntityList) {
-            boardDTOList.add(BoardDTO.toBoardDTO(boardEntity));
-        }
-        return boardDTOList;
+    public List<BoardDTO> findAll(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return boardRepository.findAllByOrderByIdDesc(pageable)
+                .stream()
+                .map(BoardDTO::toBoardDTO)
+                .toList();
     }
 
     @Transactional

@@ -1,6 +1,8 @@
 package com.example.board.board.repository;
 
 import com.example.board.board.entity.BoardEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,6 +25,10 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
     boolean existsByBoardTitle(String boardTitle);
 
     List<BoardEntity> findTop100ByOrderByIdDesc();
+
+    Page<BoardEntity> findAll(Pageable pageable);
+
+    Page<BoardEntity> findAllByOrderByIdDesc(Pageable pageable);
 }
 
 

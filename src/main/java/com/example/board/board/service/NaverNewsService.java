@@ -26,7 +26,7 @@ public class NaverNewsService {
     @Value("${naver.client-secret}")
     private String clientSecret;
 
-    @Value("${ai.server-url}")
+    @Value("${app.ai-server-url}")
     private String aiServerUrl;
 
     public void saveNewsToBoardMultiple(String... queries) {
