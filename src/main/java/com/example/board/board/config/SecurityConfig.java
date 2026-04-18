@@ -51,15 +51,7 @@ public class SecurityConfig {
 
                         .anyRequest().permitAll()
                 )
-                .formLogin(form -> form
-                        .loginProcessingUrl("/member/login")
-                        .successHandler((req, res, auth) -> {
-                            res.setStatus(200);
-                        })
-                        .failureHandler((req, res, e) -> {
-                            res.setStatus(401);
-                        })
-                        .permitAll()
+                .formLogin(form -> form.disable()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/member/logout")

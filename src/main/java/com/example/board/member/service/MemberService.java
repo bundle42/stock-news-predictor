@@ -106,6 +106,24 @@ public class MemberService {
             return "ok";
         }
     }
+
+    public MemberEntity login(String email, String password) {
+
+        Optional<MemberEntity> optionalMemberEntity =
+                memberRepository.findByMemberEmail(email);
+
+        if (optionalMemberEntity.isEmpty()) {
+            throw new RuntimeException("이메일 없음");
+        }
+
+        MemberEntity member = optionalMemberEntity.get();
+
+        if (!passwordEncoder.matches(password, member.getMemberPassword())) {
+            throw new RuntimeException("비밀번호 틀림");
+        }
+
+        return member;
+    }
 }
 
 
