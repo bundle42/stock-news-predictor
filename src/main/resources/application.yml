@@ -4,7 +4,7 @@ server:
   servlet:
     session:
       cookie:
-        same-site: none
+        same-site: lax
         secure: false
 
 # database 연동 설정
