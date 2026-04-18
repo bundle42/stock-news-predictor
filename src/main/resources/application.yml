@@ -1,6 +1,11 @@
 # 서버 포트 설정
 server:
   port: ${PORT:8080}
+  servlet:
+    session:
+      cookie:
+        same-site: lax
+        secure: false
 
 # database 연동 설정
 spring:
