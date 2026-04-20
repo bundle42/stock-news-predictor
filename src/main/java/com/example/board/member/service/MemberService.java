@@ -37,8 +37,6 @@ public class MemberService {
         List<MemberDTO> memberDTOList = new ArrayList<>();
         for (MemberEntity memberEntity: memberEntityList) {
             memberDTOList.add(MemberDTO.toMemberDTO(memberEntity));
-//            MemberDTO memberDTO = MemberDTO.toMemberDTO(memberEntity);
-//            memberDTOList.add(memberDTO);
         }
         System.out.println(passwordEncoder.encode("aa"));
         return memberDTOList;

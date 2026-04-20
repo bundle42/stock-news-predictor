@@ -39,18 +39,19 @@ public class BoardService {
                 .findByMemberEmail(email)
                 .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
 
-        if (boardDTO.getBoardFile().isEmpty()) {
+        MultipartFile boardFile = boardDTO.getBoardFile();
+
+        if (boardFile == null || boardFile.isEmpty()) {
             BoardEntity boardEntity = BoardEntity.toSaveEntity(boardDTO);
             boardEntity.setMember(member);
             boardRepository.save(boardEntity);
         } else {
-            MultipartFile boardFile = boardDTO.getBoardFile();
             String originalFilename = boardFile.getOriginalFilename();
             String storedFileName = System.currentTimeMillis() + "_" + originalFilename;
 
             File dir = new File(uploadDir);
             if (!dir.exists()) {
-                dir.mkdirs(); // 폴더 없으면 생성
+                dir.mkdirs();
             }
 
             String savePath = uploadDir + File.separator + storedFileName;

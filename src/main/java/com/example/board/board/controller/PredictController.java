@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
-public class StockController {
+public class PredictController {
 
     private final PredictService predictService;
 

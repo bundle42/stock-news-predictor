@@ -13,6 +13,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         String resourcePath = "/upload/**";
@@ -23,14 +26,5 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addResourceHandler(resourcePath)
                 .addResourceLocations(savePath);
-    }
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173")
-                .allowedMethods("*")
-                .allowedHeaders("*")
-                .allowCredentials(true);
     }
 }

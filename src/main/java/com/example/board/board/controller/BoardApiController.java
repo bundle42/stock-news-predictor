@@ -3,8 +3,13 @@ package com.example.board.board.controller;
 import com.example.board.board.dto.BoardDTO;
 import com.example.board.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -35,11 +40,30 @@ public class BoardApiController {
 
         BoardDTO board = boardService.findById(id);
 
-        //String prediction = fastApiService.predict(board.getContents());
-
         return Map.of(
                 "board", board,
                 "prediction", "prediction"
         );
+    }
+
+    // 저장
+    @PostMapping("/save")
+    public ResponseEntity<?> save(
+            @RequestParam String boardTitle,
+            @RequestParam String boardContents,
+            @RequestParam(required = false) MultipartFile boardFile,
+            @AuthenticationPrincipal UserDetails user
+    ) throws IOException {
+
+        String email = user.getUsername();
+
+        BoardDTO dto = new BoardDTO();
+        dto.setBoardTitle(boardTitle);
+        dto.setBoardContents(boardContents);
+        dto.setBoardFile(boardFile);
+
+        boardService.save(dto, email);
+
+        return ResponseEntity.ok().build();
     }
 }

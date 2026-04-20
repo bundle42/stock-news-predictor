@@ -1,5 +1,6 @@
 package com.example.board.board.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -41,12 +42,15 @@ public class SecurityConfig {
                         })
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // 공개(먼저!)
                         .requestMatchers("/", "/member/**").permitAll()
+                        .requestMatchers("/api/member/login", "/api/member/logout").permitAll()
 
+                        // 관리자
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
+                        // 인증 필요
                         .requestMatchers("/api/**", "/board/**").authenticated()
 
                         .anyRequest().permitAll()
@@ -54,7 +58,7 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/member/logout")
+                        .logoutUrl("/api/member/logout")
                         .logoutSuccessHandler((req, res, auth) -> {
                             res.setStatus(200);
                         })
@@ -67,11 +71,14 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of(frontendUrl));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
