@@ -12,18 +12,26 @@ import java.time.LocalDateTime;
 @ToString
 public class CommentDTO {
     private Long id;
-    private String commentWriter;
+    private Long memberId;
+    private String memberEmail;
+
     private String commentContents;
     private Long boardId;
     private LocalDateTime commentCreatedTime;
 
     public static CommentDTO toCommentDTO(CommentEntity commentEntity, Long boardId) {
-        CommentDTO commentDTO = new CommentDTO();
-        commentDTO.setId(commentEntity.getId());
-        commentDTO.setCommentWriter(commentEntity.getCommentWriter());
-        commentDTO.setCommentContents(commentEntity.getCommentContents());
-        commentDTO.setCommentCreatedTime(commentEntity.getCreatedTime());
-        commentDTO.setBoardId(boardId);
-        return commentDTO;
+        CommentDTO dto = new CommentDTO();
+
+        dto.setId(commentEntity.getId());
+        dto.setCommentContents(commentEntity.getCommentContents());
+        dto.setCommentCreatedTime(commentEntity.getCreatedTime());
+        dto.setBoardId(boardId);
+
+        if (commentEntity.getMember() != null) {
+            dto.setMemberId(commentEntity.getMember().getId());
+            dto.setMemberEmail(commentEntity.getMember().getMemberEmail());
+        }
+
+        return dto;
     }
 }

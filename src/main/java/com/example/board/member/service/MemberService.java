@@ -38,33 +38,13 @@ public class MemberService {
         for (MemberEntity memberEntity: memberEntityList) {
             memberDTOList.add(MemberDTO.toMemberDTO(memberEntity));
         }
-        System.out.println(passwordEncoder.encode("aa"));
         return memberDTOList;
-    }
-
-    public MemberDTO findById(Long id) {
-        Optional<MemberEntity> optionalMemberEntity = memberRepository.findById(id);
-        if (optionalMemberEntity.isPresent()) {
-            return MemberDTO.toMemberDTO(optionalMemberEntity.get());
-        } else {
-            return null;
-        }
-
     }
 
     public MemberDTO findByEmail(String email) {
         Optional<MemberEntity> optionalMemberEntity = memberRepository.findByMemberEmail(email);
 
         if(optionalMemberEntity.isPresent()) {
-            return MemberDTO.toMemberDTO(optionalMemberEntity.get());
-        } else {
-            return null;
-        }
-    }
-
-    public MemberDTO updateForm(String myEmail) {
-        Optional<MemberEntity> optionalMemberEntity = memberRepository.findByMemberEmail(myEmail);
-        if (optionalMemberEntity.isPresent()) {
             return MemberDTO.toMemberDTO(optionalMemberEntity.get());
         } else {
             return null;
@@ -82,7 +62,7 @@ public class MemberService {
 
         // 비밀번호를 입력 했다면
         if(memberDTO.getMemberPassword() != null &&
-                !memberDTO.getMemberPassword().isEmpty()) {
+                !memberDTO.getMemberPassword().isBlank()) {
 
             // 새롭게 갱신
             String encodedPassword = passwordEncoder.encode(memberDTO.getMemberPassword());
@@ -90,34 +70,36 @@ public class MemberService {
         }
     }
 
+    @Transactional
+    public void changeRole(Long id, String role) {
+        MemberEntity member = memberRepository.findById(id)
+                .orElseThrow();
+
+        member.setMemberRole(role);
+    }
+
     public void deleteById(Long id) {
         memberRepository.deleteById(id);
     }
 
-    public String emailCheck(String memberEmail) {
-        Optional<MemberEntity> byMemberEmail = memberRepository.findByMemberEmail(memberEmail);
-        if (byMemberEmail.isPresent()) {
-            // 조회결과가 있다 -> 사용할 수 없다.
-            return null;
-        } else {
-            // 조회결과가 없다 -> 사용할 수 있다.
-            return "ok";
-        }
+    public void deleteByEmail(String email) {
+        MemberEntity member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new RuntimeException("유저 없음"));
+
+        memberRepository.delete(member);
+    }
+
+    public boolean emailExists(String memberEmail) {
+        return memberRepository.findByMemberEmail(memberEmail).isPresent();
     }
 
     public MemberEntity login(String email, String password) {
 
-        Optional<MemberEntity> optionalMemberEntity =
-                memberRepository.findByMemberEmail(email);
-
-        if (optionalMemberEntity.isEmpty()) {
-            throw new RuntimeException("이메일 없음");
-        }
-
-        MemberEntity member = optionalMemberEntity.get();
+        MemberEntity member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new RuntimeException("EMAIL_NOT_FOUND"));
 
         if (!passwordEncoder.matches(password, member.getMemberPassword())) {
-            throw new RuntimeException("비밀번호 틀림");
+            throw new RuntimeException("INVALID_PASSWORD");
         }
 
         return member;

@@ -36,3 +36,10 @@ app:
 
 file:
   upload-dir: ${UPLOAD_DIR}
+
+logging:
+  level:
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.apache.catalina: WARN
+    root: INFO

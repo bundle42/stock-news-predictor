@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +35,7 @@ public class BoardService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
+    // 일반 글 저장
     public void save(BoardDTO boardDTO, String email) throws IOException {
         MemberEntity member = memberRepository
                 .findByMemberEmail(email)
@@ -82,37 +84,40 @@ public class BoardService {
     }
 
     @Transactional
-    public void updateHits(Long id) {
-        boardRepository.updateHits(id);
-    }
-
-    @Transactional
     public BoardDTO findById(Long id) {
-        Optional<BoardEntity> optionalBoardEntity = boardRepository.findById(id);
-        if (optionalBoardEntity.isPresent()) {
-            BoardEntity boardEntity = optionalBoardEntity.get();
-            BoardDTO boardDTO = BoardDTO.toBoardDTO(boardEntity);
-            return boardDTO;
-        } else {
-            return null;
-        }
-    }
+        boardRepository.updateHits(id);
 
-    @Transactional
-    public BoardDTO update(BoardDTO boardDTO) {
-
-        BoardEntity boardEntity = boardRepository
-                .findById(boardDTO.getId())
+        BoardEntity boardEntity = boardRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("게시글 없음"));
-
-        boardEntity.setBoardTitle(boardDTO.getBoardTitle());
-        boardEntity.setBoardContents(boardDTO.getBoardContents());
 
         return BoardDTO.toBoardDTO(boardEntity);
     }
 
-    public void delete(Long id) {
-        boardRepository.deleteById(id);
+    @Transactional
+    public void update(Long id, BoardDTO boardDTO, String email) {
+
+        BoardEntity boardEntity = boardRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("게시글 없음"));
+
+        if (!boardEntity.getMember().getMemberEmail().equals(email)) {
+            throw new AccessDeniedException("권한 없음");
+        }
+
+        boardEntity.setBoardTitle(boardDTO.getBoardTitle());
+        boardEntity.setBoardContents(boardDTO.getBoardContents());
+    }
+
+    @Transactional
+    public void delete(Long boardId, String email) {
+
+        BoardEntity board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new RuntimeException("게시글 없음"));
+
+        if (!board.getMember().getMemberEmail().equals(email)) {
+            throw new AccessDeniedException("권한 없음");
+        }
+
+        boardRepository.delete(board);
     }
 
     @Transactional
@@ -127,6 +132,7 @@ public class BoardService {
                 .toList();
     }
 
+    // 네이버 뉴스 저장
     public void saveFromApi(BoardDTO boardDTO) {
         MemberEntity member = memberRepository.findById(boardDTO.getMemberId())
                 .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));

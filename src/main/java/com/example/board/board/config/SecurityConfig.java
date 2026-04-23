@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,48 +22,25 @@ public class SecurityConfig {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((req, res, e) -> {
-                            String uri = req.getRequestURI();
-
-                            if (uri.startsWith("/api")) {
-                                res.setStatus(401);
-                            } else {
-                                res.sendRedirect("/member/login");
-                            }
-                        })
-                        .accessDeniedHandler((req, res, e) -> {
-                            String uri = req.getRequestURI();
-
-                            if (uri.startsWith("/api")) {
-                                res.setStatus(403);
-                            } else {
-                                res.sendError(403);
-                            }
-                        })
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // 공개(먼저!)
-                        .requestMatchers("/", "/member/**").permitAll()
-                        .requestMatchers("/api/member/login", "/api/member/logout").permitAll()
+                        .requestMatchers(
+                                "/api/member/login",
+                                "/api/member/signup",
+                                "/api/member/logout",
+                                "/upload/**",
+                                "/error"
+                        ).permitAll()
 
-                        // 관리자
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        // 인증 필요
-                        .requestMatchers("/api/**", "/board/**").authenticated()
+                        .requestMatchers("/api/**").authenticated()
 
                         .anyRequest().permitAll()
                 )
-                .formLogin(form -> form.disable()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/api/member/logout")
-                        .logoutSuccessHandler((req, res, auth) -> {
-                            res.setStatus(200);
-                        })
-                )
+                .formLogin(form -> form.disable())
+                .httpBasic(httpBasic -> httpBasic.disable())
                 .build();
     }
 
@@ -79,7 +57,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(frontendUrl));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 

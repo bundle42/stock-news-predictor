@@ -29,21 +29,32 @@ public class BoardApiController {
         return boardService.findAll(page, size);
     }
 
+    @GetMapping("/my")
+    public List<BoardDTO> myBoards(@AuthenticationPrincipal UserDetails user) {
+        return boardService.findByMemberEmail(user.getUsername());
+    }
+
     // 상세
     @GetMapping("/{id}")
     public BoardDTO findById(@PathVariable Long id) {
         return boardService.findById(id);
     }
 
-    @GetMapping("/{id}/prediction")
-    public Map<String, Object> getPrediction(@PathVariable Long id) {
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(
+            @PathVariable Long id,
+            @RequestBody BoardDTO boardDTO,
+            @AuthenticationPrincipal UserDetails user
+    ) {
+        boardService.update(id, boardDTO, user.getUsername());
+        return ResponseEntity.ok().build();
+    }
 
-        BoardDTO board = boardService.findById(id);
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id,
+                       @AuthenticationPrincipal UserDetails user) {
 
-        return Map.of(
-                "board", board,
-                "prediction", "prediction"
-        );
+        boardService.delete(id, user.getUsername());
     }
 
     // 저장

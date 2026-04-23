@@ -2,31 +2,56 @@ package com.example.board.board.controller;
 
 import com.example.board.board.dto.CommentDTO;
 import com.example.board.board.service.CommentService;
+import com.example.board.member.entity.MemberEntity;
+import com.example.board.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/comment")
+@RequestMapping("/api/comment")
 public class CommentController {
+
     private final CommentService commentService;
-    @PostMapping("/save")
-    public ResponseEntity save(@ModelAttribute CommentDTO commentDTO) {
-        System.out.println("commentDTO = " + commentDTO);
-        Long saveResult = commentService.save(commentDTO);
-        if (saveResult != null) {
-            List<CommentDTO> commentDTOList = commentService.findAll(commentDTO.getBoardId());
-            return new ResponseEntity<>(commentDTOList, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("해당 게시글이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
-        }
+    private final MemberRepository memberRepository;
+
+    @PostMapping
+    public ResponseEntity<?> save(
+            @RequestBody CommentDTO dto,
+            @AuthenticationPrincipal UserDetails user
+    ) {
+        String email = user.getUsername();
+        MemberEntity member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new RuntimeException("회원 없음"));
+
+        commentService.save(dto, member);
+
+        return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/{boardId}")
+    public ResponseEntity<List<CommentDTO>> findAll(@PathVariable Long boardId) {
+        List<CommentDTO> list = commentService.findAll(boardId);
+        return ResponseEntity.ok(list);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails user
+    ) {
+        String email = user.getUsername();
+
+        MemberEntity member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new RuntimeException("회원 없음"));
+
+        commentService.delete(id, member.getId());
+
+        return ResponseEntity.ok().build();
+    }
 }

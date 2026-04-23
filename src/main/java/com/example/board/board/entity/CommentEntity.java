@@ -1,6 +1,7 @@
 package com.example.board.board.entity;
 
 import com.example.board.board.dto.CommentDTO;
+import com.example.board.member.entity.MemberEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,12 +12,10 @@ import jakarta.persistence.*;
 @Setter
 @Table(name = "comment_table")
 public class CommentEntity extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(length = 20, nullable = false)
-    private String commentWriter;
 
     @Column
     private String commentContents;
@@ -26,12 +25,22 @@ public class CommentEntity extends BaseEntity {
     @JoinColumn(name = "board_id")
     private BoardEntity boardEntity;
 
+    /* Member:Comment = 1:N */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private MemberEntity member;
 
-    public static CommentEntity toSaveEntity(CommentDTO commentDTO, BoardEntity boardEntity) {
-        CommentEntity commentEntity = new CommentEntity();
-        commentEntity.setCommentWriter(commentDTO.getCommentWriter());
-        commentEntity.setCommentContents(commentDTO.getCommentContents());
-        commentEntity.setBoardEntity(boardEntity);
-        return commentEntity;
+    public static CommentEntity toSaveEntity(
+            CommentDTO dto,
+            BoardEntity board,
+            MemberEntity member
+    ) {
+        CommentEntity entity = new CommentEntity();
+
+        entity.setCommentContents(dto.getCommentContents());
+        entity.setBoardEntity(board);
+        entity.setMember(member);
+
+        return entity;
     }
 }

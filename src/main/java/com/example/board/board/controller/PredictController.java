@@ -16,18 +16,6 @@ public class PredictController {
 
     private final PredictService predictService;
 
-    @GetMapping("/stock/predict")
-    public String predictStock(@RequestParam("stockName") String stockName, Model model) {
-        try {
-            Map<String, Object> prediction = predictService.start(stockName);
-            model.addAttribute("prediction", prediction);
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", e.getMessage());
-        }
-
-        return "board/predict";
-    }
-
     @GetMapping("/api/predict")
     @ResponseBody
     public Map<String, Object> predictStockApi(@RequestParam("stockName") String stockName) {
