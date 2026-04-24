@@ -1,0 +1,27 @@
+package com.example.board.member.dto;
+
+import com.example.board.member.entity.MemberEntity;
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class MemberDTO {
+    private Long id;
+    private String memberEmail;
+    private String memberPassword;
+    private String memberName;
+    private String memberRole;
+
+    public static MemberDTO toMemberDTO(MemberEntity memberEntity) {
+        MemberDTO memberDTO = new MemberDTO();
+        memberDTO.setId(memberEntity.getId());
+        memberDTO.setMemberEmail(memberEntity.getMemberEmail());
+        memberDTO.setMemberPassword(memberEntity.getMemberPassword());
+        memberDTO.setMemberName(memberEntity.getMemberName());
+        memberDTO.setMemberRole(memberEntity.getMemberRole());
+        return memberDTO;
+    }
+}

@@ -1,0 +1,45 @@
+# 서버 포트 설정
+server:
+  port: ${PORT:8080}
+  servlet:
+    session:
+      cookie:
+        same-site: lax
+        secure: false
+
+# database 연동 설정
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  thymeleaf:
+    cache: false
+
+  # spring data jpa 설정
+  jpa:
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+# 네이버 뉴스 API
+naver:
+  client-id: ${NAVER_CLIENT_ID}
+  client-secret: ${NAVER_CLIENT_SECRET}
+
+# URL 링크
+app:
+  ai-server-url: ${AI_SERVER_URL}
+  frontend-url: ${FRONTEND_URL}
+
+file:
+  upload-dir: ${UPLOAD_DIR}
+
+logging:
+  level:
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.apache.catalina: WARN
+    root: INFO
