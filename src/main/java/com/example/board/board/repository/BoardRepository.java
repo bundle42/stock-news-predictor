@@ -22,10 +22,6 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
 
     List<BoardEntity> findByPubDateBetweenAndSearchQueryContainingOrderByPubDateAsc(String startDate, String endDate, String searchQuery);
 
-    boolean existsByBoardTitle(String boardTitle);
-
-    List<BoardEntity> findTop100ByOrderByIdDesc();
-
     Page<BoardEntity> findAll(Pageable pageable);
 
     Page<BoardEntity> findAllByOrderByIdDesc(Pageable pageable);

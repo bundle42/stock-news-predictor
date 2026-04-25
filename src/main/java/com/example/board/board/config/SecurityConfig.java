@@ -30,7 +30,7 @@ public class SecurityConfig {
                                 "/api/member/login",
                                 "/api/member/signup",
                                 "/api/member/logout",
-                                "/upload/**",
+                                "/uploads/**",
                                 "/error"
                         ).permitAll()
 

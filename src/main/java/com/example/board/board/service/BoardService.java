@@ -18,9 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 // DTO -> Entity (Entity Class)
 // Entity -> DTO (DTO Class)
@@ -141,9 +139,5 @@ public class BoardService {
         boardEntity.setMember(member);
 
         boardRepository.save(boardEntity);
-    }
-
-    public boolean existsByTitle(String title) {
-        return boardRepository.existsByBoardTitle(title);
     }
 }
