@@ -18,11 +18,13 @@ import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class BoardCsvImporterService {
+public class CsvNewsService {
 
     @Value("${file.upload-dir}")
     private String csvDir;
@@ -54,6 +56,9 @@ public class BoardCsvImporterService {
             throw new RuntimeException("news_sentiment로 시작하는 CSV 파일이 없습니다.");
         }
 
+        // DB에 있는 기존 링크 한번에 가져오기
+        Set<String> existingLinks = new HashSet<>(boardRepository.findAllLinks());
+
         for (File csvFile : csvFiles) {
             System.out.println("불러오는 파일: " + csvFile.getName());
 
@@ -78,6 +83,20 @@ public class BoardCsvImporterService {
                     String contents = getValue(line, 5);
                     String newsLink = getValue(line, 6);
                     String searchQuery = getValue(line, 7);
+
+                    // 길이 제한
+                    if (newsLink.length() > 500) {
+                        newsLink = newsLink.substring(0, 500);
+                    }
+
+                    // 공백 + 중복 제거
+                    if (newsLink == null || newsLink.isBlank() || existingLinks.contains(newsLink)) {
+                        continue;
+                    }
+
+                    // Set에도 추가
+                    existingLinks.add(newsLink);
+
 
                     double sentimentScore = parseDouble(sentimentScoreStr);
                     double sentimentConfidence = parseDouble(confidenceStr);

@@ -22,7 +22,7 @@ public class BoardEntity extends BaseEntity {
     @Column
     private String boardTitle;
 
-    @Column(length = 1000)
+    @Column(length = 500, unique = true)
     private String newsLink;
 
     @Column

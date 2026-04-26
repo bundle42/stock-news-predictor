@@ -69,6 +69,10 @@ public class NaverNewsService {
                 String description = item.get("description").asText().replaceAll("<[^>]*>", "");
                 String link = item.get("link").asText();
 
+                if (link == null || link.trim().isEmpty()) {
+                    continue;
+                }
+
                 String pubDate = item.get("pubDate").asText();
 
                 DateTimeFormatter inputFormatter =

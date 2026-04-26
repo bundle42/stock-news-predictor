@@ -25,18 +25,19 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
     Page<BoardEntity> findAll(Pageable pageable);
 
     Page<BoardEntity> findAllByOrderByIdDesc(Pageable pageable);
+
+    @Query("""
+        SELECT b.id FROM BoardEntity b
+        WHERE b.newsLink IS NOT NULL AND TRIM(b.newsLink) <> ''
+        AND b.id NOT IN (
+            SELECT MIN(b2.id)
+            FROM BoardEntity b2
+            WHERE b2.newsLink IS NOT NULL AND TRIM(b2.newsLink) <> ''
+            GROUP BY b2.newsLink
+        )
+    """)
+    List<Long> findDuplicateIds();
+
+    @Query("SELECT b.newsLink FROM BoardEntity b WHERE b.newsLink IS NOT NULL")
+    List<String> findAllLinks();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

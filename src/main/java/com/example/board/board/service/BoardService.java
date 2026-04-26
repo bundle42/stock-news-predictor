@@ -9,6 +9,7 @@ import com.example.board.member.entity.MemberEntity;
 import com.example.board.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -138,6 +139,27 @@ public class BoardService {
         BoardEntity boardEntity = BoardEntity.toSaveEntity(boardDTO);
         boardEntity.setMember(member);
 
-        boardRepository.save(boardEntity);
+        try {
+            boardRepository.save(boardEntity);
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("unique")) {
+                System.out.println("중복 스킵");
+            } else {
+                throw e; // 진짜 에러는 터뜨림
+            }
+        }
+    }
+
+    @Transactional
+    public void deleteDuplicateBoards() {
+        List<Long> ids = boardRepository.findDuplicateIds();
+
+        for (Long id : ids) {
+            BoardEntity board = boardRepository.findById(id)
+                    .orElseThrow();
+
+            // DB 삭제 (cascade 작동)
+            boardRepository.delete(board);
+        }
     }
 }

@@ -1,6 +1,6 @@
 package com.example.board.member.controller;
 
-import com.example.board.board.service.BoardCsvImporterService;
+import com.example.board.board.service.CsvNewsService;
 import com.example.board.board.service.NaverNewsService;
 import com.example.board.member.dto.MemberDTO;
 import com.example.board.member.dto.RoleChangeRequest;
@@ -19,7 +19,7 @@ public class AdminApiController {
 
     private final MemberService memberService;
     private final NaverNewsService naverNewsService;
-    private final BoardCsvImporterService boardCsvImporterService;
+    private final CsvNewsService boardCsvImporterService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/news/import")

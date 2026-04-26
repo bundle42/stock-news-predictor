@@ -34,6 +34,7 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
 
+                        .requestMatchers("/api/board/duplicates").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").authenticated()
 

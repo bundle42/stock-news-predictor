@@ -77,4 +77,10 @@ public class BoardApiController {
 
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/duplicates")
+    public ResponseEntity<String> deleteDuplicates() {
+        boardService.deleteDuplicateBoards();
+        return ResponseEntity.ok("중복 게시글 삭제 완료");
+    }
 }
