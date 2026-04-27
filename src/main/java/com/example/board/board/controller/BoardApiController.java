@@ -29,9 +29,21 @@ public class BoardApiController {
         return boardService.findAll(page, size);
     }
 
+    @GetMapping("/human")
+    public List<BoardDTO> findHuman(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return boardService.findHuman(page, size);
+    }
+
     @GetMapping("/my")
-    public List<BoardDTO> myBoards(@AuthenticationPrincipal UserDetails user) {
-        return boardService.findByMemberEmail(user.getUsername());
+    public List<BoardDTO> findByMemberEmail(
+            @AuthenticationPrincipal UserDetails user,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return boardService.findByMemberEmail(user, page, size);
     }
 
     // 상세
