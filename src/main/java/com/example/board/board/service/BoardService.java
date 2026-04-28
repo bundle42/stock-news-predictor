@@ -139,6 +139,12 @@ public class BoardService {
 
     // 네이버 뉴스 저장
     public void saveFromApi(BoardDTO boardDTO) {
+
+        if (boardRepository.existsByNewsLink(boardDTO.getNewsLink())) {
+            System.out.println("중복 스킵");
+            return;
+        }
+
         MemberEntity member = memberRepository.findById(boardDTO.getMemberId())
                 .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
 
@@ -148,11 +154,8 @@ public class BoardService {
         try {
             boardRepository.save(boardEntity);
         } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("unique")) {
-                System.out.println("중복 스킵");
-            } else {
-                throw e; // 진짜 에러는 터뜨림
-            }
+            // race condition 대비
+            System.out.println("중복 스킵");
         }
     }
 

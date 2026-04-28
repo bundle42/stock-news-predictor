@@ -39,4 +39,6 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
 
     @Query("SELECT b.newsLink FROM BoardEntity b WHERE b.newsLink IS NOT NULL")
     List<String> findAllLinks();
+
+    boolean existsByNewsLink(String newsLink);
 }

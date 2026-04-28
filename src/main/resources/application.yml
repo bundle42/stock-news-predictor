@@ -5,7 +5,7 @@ server:
     session:
       cookie:
         same-site: lax
-        secure: false
+        secure: true
 
 # database 연동 설정
 spring:
