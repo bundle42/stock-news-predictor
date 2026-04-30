@@ -52,7 +52,7 @@ public class MemberApiController {
     public ResponseEntity<?> login(@RequestBody LoginDTO dto, HttpSession session) {
 
         try {
-            MemberEntity member = memberService.login(dto.username(), dto.password());
+            MemberEntity member = memberService.login(dto.memberEmail(), dto.memberPassword());
 
             // 1. UserDetails 생성
             UserDetails userDetails = org.springframework.security.core.userdetails.User

@@ -8,19 +8,17 @@ import com.example.board.board.repository.BoardRepository;
 import com.example.board.member.entity.MemberEntity;
 import com.example.board.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 // DTO -> Entity (Entity Class)
 // Entity -> DTO (DTO Class)
@@ -32,10 +30,10 @@ public class BoardService {
     private final BoardFileRepository boardFileRepository;
     private final MemberRepository memberRepository;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    private final S3Service s3Service;
 
     // 일반 글 저장
+    @Transactional
     public void save(BoardDTO boardDTO, String email) throws IOException {
         MemberEntity member = memberRepository
                 .findByMemberEmail(email)
@@ -49,15 +47,8 @@ public class BoardService {
             boardRepository.save(boardEntity);
         } else {
             String originalFilename = boardFile.getOriginalFilename();
-            String storedFileName = System.currentTimeMillis() + "_" + originalFilename;
 
-            File dir = new File(uploadDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            String savePath = uploadDir + File.separator + storedFileName;
-            boardFile.transferTo(new File(savePath));
+            String imageUrl = s3Service.uploadFile(boardFile);
 
             BoardEntity boardEntity = BoardEntity.toSaveFileEntity(boardDTO);
             boardEntity.setMember(member);
@@ -65,7 +56,7 @@ public class BoardService {
             BoardEntity board = boardRepository.save(boardEntity);
 
             BoardFileEntity boardFileEntity =
-                    BoardFileEntity.toBoardFileEntity(board, originalFilename, storedFileName);
+                    BoardFileEntity.toBoardFileEntity(board, originalFilename, imageUrl);
 
             boardFileRepository.save(boardFileEntity);
         }
@@ -78,6 +69,32 @@ public class BoardService {
         Pageable pageable = PageRequest.of(page, size);
 
         return boardRepository.findAllByOrderByIdDesc(pageable)
+                .stream()
+                .map(BoardDTO::toBoardDTO)
+                .toList();
+    }
+
+    @Transactional
+    public List<BoardDTO> findHuman(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return boardRepository.findByNewsLinkIsNullOrderByIdDesc(pageable)
+                .stream()
+                .map(BoardDTO::toBoardDTO)
+                .toList();
+    }
+
+    @Transactional
+    public List<BoardDTO> findByMemberEmail(UserDetails user, int page, int size) {
+        String email = user.getUsername();
+
+        MemberEntity member = memberRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return boardRepository.findAllByMemberIdOrderByIdDesc(member.getId(), pageable)
                 .stream()
                 .map(BoardDTO::toBoardDTO)
                 .toList();
@@ -120,30 +137,38 @@ public class BoardService {
         boardRepository.delete(board);
     }
 
-    @Transactional
-    public List<BoardDTO> findByMemberEmail(String email) {
-
-        MemberEntity member = memberRepository.findByMemberEmail(email)
-                .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
-
-        return boardRepository.findAllByMemberId(member.getId())
-                .stream()
-                .map(BoardDTO::toBoardDTO)
-                .toList();
-    }
-
     // 네이버 뉴스 저장
     public void saveFromApi(BoardDTO boardDTO) {
+
+        if (boardRepository.existsByNewsLink(boardDTO.getNewsLink())) {
+            System.out.println("중복 스킵");
+            return;
+        }
+
         MemberEntity member = memberRepository.findById(boardDTO.getMemberId())
                 .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
 
         BoardEntity boardEntity = BoardEntity.toSaveEntity(boardDTO);
         boardEntity.setMember(member);
 
-        boardRepository.save(boardEntity);
+        try {
+            boardRepository.save(boardEntity);
+        } catch (DataIntegrityViolationException e) {
+            // race condition 대비
+            System.out.println("중복 스킵");
+        }
     }
 
-    public boolean existsByTitle(String title) {
-        return boardRepository.existsByBoardTitle(title);
+    @Transactional
+    public void deleteDuplicateBoards() {
+        List<Long> ids = boardRepository.findDuplicateIds();
+
+        for (Long id : ids) {
+            BoardEntity board = boardRepository.findById(id)
+                    .orElseThrow();
+
+            // DB 삭제 (cascade 작동)
+            boardRepository.delete(board);
+        }
     }
 }

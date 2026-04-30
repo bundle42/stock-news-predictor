@@ -1,4 +1,4 @@
 package com.example.board.member.dto;
 
-public record LoginDTO(String username, String password) {
+public record LoginDTO(String memberEmail, String memberPassword) {
 }
