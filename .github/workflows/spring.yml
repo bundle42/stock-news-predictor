@@ -2,8 +2,8 @@ name: Spring Deploy
 
 on:
   push:
-    paths:
-      - "news-backend/**"
+    branches:
+      - develop
 
 jobs:
   deploy:
