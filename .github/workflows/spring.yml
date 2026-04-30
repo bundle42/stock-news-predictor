@@ -1,0 +1,30 @@
+name: Spring Deploy
+
+on:
+  push:
+    paths:
+      - "news-backend/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build Spring
+        run: |
+          cd news-backend
+          ./gradlew clean build
+
+      - name: Upload jar & Deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            pkill -f "java -jar" || true
+            cd /home/ec2-user/news-backend
+            ./gradlew clean build
+            nohup java -jar build/libs/*.jar > app.log 2>&1 &
