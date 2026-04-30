@@ -24,10 +24,17 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /home/ec2-user/news-backend
+
+            # 강제 동기화 (핵심)
+            git reset --hard
+            git clean -fd
             git pull origin develop
-            # 기존 Spring 완전 종료
-            pkill -f board-0.0.1-SNAPSHOT.jar || true
+
+            # 기존 서버 종료
+            pkill -f board || true
+
             # build
             ./gradlew clean build -x test
+
             # 실행
             nohup java -jar build/libs/board-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
