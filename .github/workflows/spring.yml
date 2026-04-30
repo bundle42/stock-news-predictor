@@ -15,21 +15,27 @@ jobs:
       - name: Build Spring
         run: |
           ./gradlew clean build -x test
+      
+      - name: Rename jar
+        run: |
+          cp build/libs/*SNAPSHOT.jar app.jar
 
-      - name: Upload jar & Deploy
+      - name: Upload jar
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          source: "app.jar"
+          target: "/home/ec2-user/app/"
+        
+      - name: Deploy
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd /home/ec2-user/news-backend
+            pkill -f app.jar || true
 
-            git reset --hard
-            git pull origin develop
-
-            pkill -f board || true
-
-            ./gradlew clean build -x test --no-daemon
-
-            nohup java -jar build/libs/board-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            nohup java -jar /home/ec2-user/app/app.jar > app.log 2>&1 &
