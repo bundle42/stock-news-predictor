@@ -14,7 +14,6 @@ jobs:
 
       - name: Build Spring
         run: |
-          cd news-backend
           ./gradlew clean build
 
       - name: Upload jar & Deploy
