@@ -38,7 +38,7 @@ jobs:
           script: |
             pkill -f app.jar || true
 
-            nohup java -jar /home/ec2-user/app/app.jar \
-            > /home/ec2-user/app/app.log 2>&1 < /dev/null & disown
+            setsid java -jar /home/ec2-user/app/app.jar \
+            > /home/ec2-user/app/app.log 2>&1 < /dev/null &
 
             exit 0
