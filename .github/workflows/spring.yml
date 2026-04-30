@@ -23,7 +23,8 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           script: |
-            pkill -f "java -jar" || true
+            PID=$(lsof -t -i:8080)
+            if [ -n "$PID" ]; then kill -9 $PID; fi
             cd /home/ec2-user/news-backend
             ./gradlew clean build
             nohup java -jar build/libs/*.jar > app.log 2>&1 &
