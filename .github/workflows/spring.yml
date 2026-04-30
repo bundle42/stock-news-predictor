@@ -17,14 +17,14 @@ jobs:
           cd news-backend
           ./gradlew clean build
 
-      - name: Deploy to EC2
+      - name: Upload jar & Deploy
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd /home/ubuntu/news-backend
-            git pull
-            ./gradlew build
+            pkill -f "java -jar" || true
+            cd /home/ec2-user/news-backend
+            ./gradlew clean build
             nohup java -jar build/libs/*.jar > app.log 2>&1 &
