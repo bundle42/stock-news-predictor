@@ -39,7 +39,4 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           script: |
-            pkill -f app.jar || true
-            echo "deploy done"
-            sleep 2
-            exit 0
+            sudo systemctl restart app
