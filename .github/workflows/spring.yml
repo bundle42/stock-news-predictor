@@ -38,4 +38,6 @@ jobs:
           script: |
             pkill -f app.jar || true
 
-            nohup java -jar /home/ec2-user/app/app.jar > app.log 2>&1 &
+            nohup java -jar /home/ec2-user/app/app.jar > app.log 2>&1 < /dev/null &
+
+            exit 0
