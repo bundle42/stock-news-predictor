@@ -20,6 +20,9 @@ jobs:
         run: |
           cp build/libs/*SNAPSHOT.jar app.jar
 
+      - name: Debug
+        run: ls -al app.jar
+
       - name: Upload jar
         uses: appleboy/scp-action@v0.1.7
         with:
