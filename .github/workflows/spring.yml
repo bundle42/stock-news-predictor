@@ -40,8 +40,3 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             pkill -f app.jar || true
-
-            setsid java -jar /home/ec2-user/app/app.jar \
-            > /home/ec2-user/app/app.log 2>&1 < /dev/null &
-
-            exit 0
