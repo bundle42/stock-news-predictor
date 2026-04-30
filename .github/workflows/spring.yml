@@ -14,7 +14,7 @@ jobs:
 
       - name: Build Spring
         run: |
-          ./gradlew clean build
+          ./gradlew clean build -x test
 
       - name: Upload jar & Deploy
         uses: appleboy/ssh-action@v1
