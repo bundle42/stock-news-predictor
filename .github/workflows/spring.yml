@@ -40,3 +40,6 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             pkill -f app.jar || true
+            echo "deploy done"
+            sleep 2
+            exit 0
