@@ -26,14 +26,6 @@ public class PredictService {
     private String aiServerUrl;
 
     public Map<String, Object> start(String stockName) {
-        return callAiServer(stockName, "/predict");
-    }
-
-    public Map<String, Object> train(String stockName) {
-        return callAiServer(stockName, "/train");
-    }
-
-    private Map<String, Object> callAiServer(String stockName, String endpoint) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd-HH-mm-ss");
 
@@ -47,21 +39,26 @@ public class PredictService {
                 .map(BoardDTO::toBoardDTO)
                 .toList();
 
+        // 1. 뉴스 데이터 없음 방지
         if (recentNews.isEmpty()) {
-            throw new IllegalStateException("뉴스 데이터가 없습니다.");
+            throw new IllegalStateException("예측을 위한 뉴스 데이터가 없습니다.");
         }
 
-        List<Map<String, Object>> dailyFeatures =
-                dailyFeatureService.makeDailyFeatures(recentNews);
+        // 중요: 일별 피처 생성
+        List<Map<String, Object>> dailyFeatures = dailyFeatureService.makeDailyFeatures(recentNews);
 
+        // 2. feature 데이터 없음 방지
         if (dailyFeatures.isEmpty()) {
-            throw new IllegalStateException("feature 생성 실패");
+            throw new IllegalStateException("예측용 feature 생성에 실패했습니다.");
         }
 
-        String url = aiServerUrl + endpoint;
+        System.out.println("===== DAILY FEATURES =====");
+        dailyFeatures.forEach(System.out::println);
+        System.out.println("==========================");
+
+        String url = aiServerUrl + "/predict";
 
         RestTemplate restTemplate = new RestTemplate();
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -71,12 +68,17 @@ public class PredictService {
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
 
-        if (response.getBody() == null) {
-            throw new IllegalStateException("응답 없음");
+            if (response.getBody() == null) {
+                throw new IllegalStateException("예측 API 응답이 비어 있습니다.");
+            }
+
+            return response.getBody();
+
+        } catch (RestClientException e) {
+            throw new IllegalStateException("Python 예측 서버 호출 실패: " + e.getMessage(), e);
         }
-
-        return response.getBody();
     }
 }
