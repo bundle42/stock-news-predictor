@@ -2,8 +2,8 @@ name: Spring Deploy
 
 on:
   push:
-    paths:
-      - "news-backend/**"
+    branches:
+      - develop
 
 jobs:
   deploy:
@@ -14,17 +14,29 @@ jobs:
 
       - name: Build Spring
         run: |
-          cd news-backend
-          ./gradlew clean build
+          ./gradlew clean build -x test
+      
+      - name: Rename jar
+        run: |
+          cp build/libs/*SNAPSHOT.jar app.jar
 
-      - name: Upload jar & Deploy
+      - name: Debug
+        run: ls -al app.jar
+
+      - name: Upload jar
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          source: "app.jar"
+          target: "/home/ec2-user/app/"
+        
+      - name: Deploy
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           script: |
-            pkill -f "java -jar" || true
-            cd /home/ec2-user/news-backend
-            ./gradlew clean build
-            nohup java -jar build/libs/*.jar > app.log 2>&1 &
+            sudo systemctl restart app

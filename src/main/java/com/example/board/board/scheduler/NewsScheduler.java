@@ -13,7 +13,7 @@ public class NewsScheduler {
 
     @Scheduled(fixedDelay = 1000 * 60 * 180) // 3시간마다
     public void runNewsCrawling() {
-        System.out.println("뉴스 자동 수집 시작 안함");
+        System.out.println("뉴스 자동 수집 시작 안함(Git Action Test01)");
         // naverNewsService.saveNewsToBoardMultiple("삼성전자", "SK하이닉스", "현대차");
     }
 }
